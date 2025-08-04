@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Solicitud de Reembolso - ACME S.A.</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="icon" type="image/png" href="https://imagenes.elpais.com/resizer/v2/Y3W6QUFBBZLLTALRW6NBRPZ2RA.jpg?auth=d68f18251117888479d8fdc3210796bc86d9d3f41719da72c2877bcafc3504ea&width=1200" />
+</head>
+<body>
+  <!-- Marca de agua -->
+  <div class="watermark">ACME S.A.</div>
+
+  <!-- Encabezado institucional -->
+  <header class="header">
+    <img src="https://imagenes.elpais.com/resizer/v2/Y3W6QUFBBZLLTALRW6NBRPZ2RA.jpg?auth=d68f18251117888479d8fdc3210796bc86d9d3f41719da72c2877bcafc3504ea&width=1200" alt="Logo Empresa" class="logo"/>
+    <div class="header-text">
+      <h1>ACME S.A.</h1>
+      <h2>Portal de Reembolsos de Gastos</h2>
+    </div>
+  </header>
+
+  <!-- Contenido del formulario -->
+  <main class="form-container">
+    <h3>Formulario de Solicitud de Reembolso</h3>
+    <form id="reembolsoForm" enctype="multipart/form-data" method="post" novalidate>
+      <label for="nombre">Nombre del Empleado:</label>
+      <input type="text" id="nombre" name="nombre" required />
+
+      <label for="cedula">Cédula o ID del Empleado:</label>
+      <input type="text" id="cedula" name="cedula" required />
+
+      <label for="departamento">Área o Departamento:</label>
+      <input type="text" id="departamento" name="departamento" required />
+
+      <label for="correo">Correo Electrónico:</label>
+      <input type="email" id="correo" name="correo" required />
+
+      <label for="telefono">Teléfono de Contacto:</label>
+      <input type="tel" id="telefono" name="telefono" />
+
+      <label for="fechaGasto">Fecha del Gasto:</label>
+      <input type="date" id="fechaGasto" name="fechaGasto" required />
+
+      <label for="tipoGasto">Tipo de Gasto:</label>
+      <select id="tipoGasto" name="tipoGasto" required>
+          <option value="">Seleccione una opción</option>
+          <option value="Transporte">Transporte</option>
+          <option value="Alimentación">Alimentación</option>
+          <option value="Hospedaje">Hospedaje</option>
+          <option value="Otros">Otros</option>
+      </select>
+
+      <label for="numeroFactura">Número de Factura:</label>
+      <input type="text" id="numeroFactura" name="numeroFactura" required />
+
+      <label for="monto">Monto del Gasto (USD):</label>
+      <input type="number" id="monto" name="monto" step="0.01" min="0" required />
+
+      <label for="medioPago">Medio de Pago:</label>
+      <select id="medioPago" name="medioPago" required>
+          <option value="">Seleccione</option>
+          <option value="Efectivo">Efectivo</option>
+          <option value="Tarjeta">Tarjeta</option>
+          <option value="Transferencia">Transferencia</option>
+      </select>
+
+      <label for="descripcion">Descripción del Gasto:</label>
+      <textarea id="descripcion" name="descripcion" required></textarea>
+
+      <label for="archivo">Factura o Recibo (PDF/Imagen):</label>
+      <input type="file" id="archivo" name="archivo" accept=".pdf,.png,.jpg,.jpeg" required />
+
+      <button type="submit">Enviar Solicitud</button>
+    </form>
+
+    <div id="mensaje" role="alert" aria-live="polite" class="mensaje"></div>
+  </main>
+
+  <footer class="footer">
+    &copy; 2025 ACME S.A. – Todos los derechos reservados.
+  </footer>
+
+  <script src="scripts.js"></script>
+</body>
+</html>
