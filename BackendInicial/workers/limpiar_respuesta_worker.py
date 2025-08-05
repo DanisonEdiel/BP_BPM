@@ -1,24 +1,28 @@
 import os
 import logging
 import asyncio
-from pyzeebe import ZeebeWorker, create_insecure_channel
+import signal
+import sys
+from pyzeebe import ZeebeWorker, create_camunda_cloud_channel
 from dotenv import load_dotenv
 
-# Configuración básica
-logging.basicConfig(level=logging.INFO)
+# Configuración de logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
+# Cargar variables de entorno
 load_dotenv()
 
-# Datos de conexión
-ZEEBE_HOST = os.getenv("ZEEBE_HOST", "localhost").strip()
-ZEEBE_PORT = int(os.getenv("ZEEBE_PORT", "26500").strip())
+# Usar credenciales de Camunda Cloud SaaS
+CLIENT_ID = os.getenv("CAMUNDA_CLIENT_ID")
+CLIENT_SECRET = os.getenv("CAMUNDA_CLIENT_SECRET")
+CLUSTER_ID = os.getenv("CAMUNDA_CLUSTER_ID")
+REGION = os.getenv("CAMUNDA_REGION", "lhr-1")
 
-channel = create_insecure_channel(f"{ZEEBE_HOST}:{ZEEBE_PORT}")
-worker = ZeebeWorker(channel)
-
-# Worker para limpiar la respuesta antes del formulario
-@worker.task(task_type="reembolso.limpiar_respuesta")
+# Función para limpiar la respuesta antes del formulario
 def limpiar_respuesta_llm(**variables):
     logger.info("🧹 Limpiando respuesta LLM")
     logger.debug(f"Variables recibidas: {variables}")
@@ -49,9 +53,43 @@ def limpiar_respuesta_llm(**variables):
 
 # Main async
 async def main():
-    logger.info("🚀 Iniciando worker 'reembolso.limpiar_respuesta'")
-    await worker.work()
+    # Crear un nuevo bucle de eventos
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    
+    try:
+        # Crear canal de conexión a Camunda Cloud
+        logger.info(f"Conectando a Camunda Cloud SaaS (Cluster: {CLUSTER_ID}, Region: {REGION})")
+        channel = create_camunda_cloud_channel(
+            client_id=CLIENT_ID,
+            client_secret=CLIENT_SECRET,
+            cluster_id=CLUSTER_ID,
+            region=REGION
+        )
+        
+        # Crear worker
+        worker = ZeebeWorker(channel)
+        
+        # Registrar la tarea
+        worker.task(task_type="reembolso.limpiar_respuesta")(limpiar_respuesta_llm)
+        
+        # Configurar manejo de señales para cierre ordenado
+        def handle_signal(sig, frame):
+            logger.info(f"Señal {sig} recibida, cerrando worker...")
+            loop.stop()
+            sys.exit(0)
+            
+        signal.signal(signal.SIGINT, handle_signal)
+        signal.signal(signal.SIGTERM, handle_signal)
+        
+        # Iniciar worker
+        logger.info("🚀 Iniciando worker 'reembolso.limpiar_respuesta'")
+        await worker.work()
+        
+    except Exception as e:
+        logger.error(f"Error en el worker: {type(e).__name__}: {str(e)}")
+        return 1
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    # Ejecutar la función principal
+    sys.exit(asyncio.run(main()))

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" id="Definitions_1ucvlda" name="DRD" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="5.35.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.6.0">
+  <decision id="PrimeraAprobacionID" name="Validación de monto">
+    <decisionTable id="DecisionTable_0063u98" hitPolicy="FIRST">
+      <input id="Input_1" label="Monto" biodi:width="150">
+        <inputExpression id="InputExpression_1" typeRef="double">
+          <text>monto</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" name="status_d1" typeRef="string" biodi:width="307">
+        <outputValues id="UnaryTests_1jkglb4">
+          <text>"APROBACION_AUTOMATICA","REQUIERE_JEFE1","REQUIERE_JEFE2","REQUIERE_JEFE3","REQUIERE_JEFE4","REQUIERE_GERENTE"</text>
+        </outputValues>
+      </output>
+      <output id="OutputClause_1x1ljtl" name="email_jefe" typeRef="string" biodi:width="358">
+        <outputValues id="UnaryTests_1e7hr2e">
+          <text>"millanda@uce.edu.ec","kmamaguana@uce.edu.ec","cdhernandezc@uce.edu.ec","balarai@uce.edu.ec","pacisnerosi@uce.edu.ec"</text>
+        </outputValues>
+      </output>
+      <rule id="DecisionRule_1">
+        <inputEntry id="UnaryTests_1">
+          <text>&lt; 100</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1">
+          <text>"APROBACION_AUTOMATICA"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_14cr775">
+          <text>"-------------------"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2">
+        <inputEntry id="UnaryTests_2">
+          <text>[100..200]</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2">
+          <text>"REQUIERE_JEFE1"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1lnjqss">
+          <text>"millanda@uce.edu.ec"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1k9n51y">
+        <inputEntry id="UnaryTests_1rxjo5u">
+          <text>[200..300]</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_01zaky8">
+          <text>"REQUIERE_JEFE2"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_10zb3rx">
+          <text>"cdhernandezc@uce.edu.ec"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1bqbdmq">
+        <inputEntry id="UnaryTests_1gk16w4">
+          <text>[300..400]</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_10wfcvc">
+          <text>"REQUIERE_JEFE3"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0fqh4vb">
+          <text>"balarai@uce.edu.ec"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0omahus">
+        <inputEntry id="UnaryTests_14rbe5y">
+          <text>[400..500]</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1cuod0d">
+          <text>"REQUIERE_JEFE4"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_18q9pyy">
+          <text>"pacisnerosi@uce.edu.ec"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_3">
+        <inputEntry id="UnaryTests_3">
+          <text>&gt; 500</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_3">
+          <text>"REQUIERE_GERENTE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_10xnl4k">
+          <text>"kmamaguana@uce.edu.ec"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape dmnElementRef="PrimeraAprobacionID">
+        <dc:Bounds height="80" width="180" x="160" y="80" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>

@@ -1,0 +1,1026 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.37.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.6.0">
+  <error id="Error_1iv1bth" name="Error al validar empleado" errorCode="EmpleadoError" />
+  <collaboration id="Collaboration_0t95nlo">
+    <participant id="Participant_108ww2y" name="Gestión Automatizada de Solicitudes de Reembolso de Gastos" processRef="Process_1bag78u" />
+  </collaboration>
+  <process id="Process_1bag78u" name="ReembolsoGastos(ToBe)" isExecutable="true">
+    <laneSet id="LaneSet_10qromz">
+      <lane id="Lane_0xc4syw" name="Empleado Solicitante">
+        <flowNodeRef>StartEvent_1</flowNodeRef>
+        <flowNodeRef>Event_03jotg0</flowNodeRef>
+        <flowNodeRef>Event_1kkjh2m</flowNodeRef>
+        <flowNodeRef>Activity_1caeq6p</flowNodeRef>
+        <flowNodeRef>Event_1vy5341</flowNodeRef>
+        <flowNodeRef>Activity_1kbfccu</flowNodeRef>
+        <flowNodeRef>Event_0nii1sx</flowNodeRef>
+        <flowNodeRef>Activity_1tkcx1y</flowNodeRef>
+      </lane>
+      <lane id="Lane_1mvfk6l" name="Sistema / Motor BPM">
+        <flowNodeRef>Activity_052r1ge</flowNodeRef>
+        <flowNodeRef>Activity_1fchbt3</flowNodeRef>
+        <flowNodeRef>Activity_0fe9obs</flowNodeRef>
+        <flowNodeRef>Event_1n6r35u</flowNodeRef>
+        <flowNodeRef>Gateway_00dpjhf</flowNodeRef>
+        <flowNodeRef>Activity_0gxr7kb</flowNodeRef>
+        <flowNodeRef>Activity_0686kpa</flowNodeRef>
+        <flowNodeRef>Activity_1ijtxk7</flowNodeRef>
+        <flowNodeRef>Event_02ubrpb</flowNodeRef>
+        <flowNodeRef>Gateway_02gm3vi</flowNodeRef>
+        <flowNodeRef>Activity_0evcnyk</flowNodeRef>
+        <flowNodeRef>Event_1yur5tq</flowNodeRef>
+        <flowNodeRef>Activity_1367sg1</flowNodeRef>
+        <flowNodeRef>Event_0ibm1ec</flowNodeRef>
+      </lane>
+      <lane id="Lane_09xsxyu" name="Validación Documental (OCR + IA/LLM)">
+        <flowNodeRef>Activity_0h9fydg</flowNodeRef>
+        <flowNodeRef>Activity_0ct3zd7</flowNodeRef>
+        <flowNodeRef>Event_1dagmza</flowNodeRef>
+        <flowNodeRef>Event_1f2212e</flowNodeRef>
+      </lane>
+      <lane id="Lane_1yco6cd" name="Aprobación (Jefe / Gerente)">
+        <flowNodeRef>Activity_05nmisw</flowNodeRef>
+        <flowNodeRef>Gateway_0zj4d7p</flowNodeRef>
+        <flowNodeRef>Event_15lr633</flowNodeRef>
+        <flowNodeRef>Event_1aq2it7</flowNodeRef>
+      </lane>
+      <lane id="Lane_01w152g" name="Finanzas / Tesorería">
+        <flowNodeRef>Activity_05wmh64</flowNodeRef>
+      </lane>
+      <lane id="Lane_0egi1hr" name="RPA / Sistemas Externos">
+        <flowNodeRef>Activity_1uvyvsb</flowNodeRef>
+        <flowNodeRef>Activity_1a29oxg</flowNodeRef>
+      </lane>
+    </laneSet>
+    <exclusiveGateway id="Gateway_00dpjhf" name="¿Documentación válida?" default="Flow_1m0b44d">
+      <incoming>Flow_0mm6ve0</incoming>
+      <outgoing>Flow_1rgnrdp</outgoing>
+      <outgoing>Flow_1m0b44d</outgoing>
+    </exclusiveGateway>
+    <exclusiveGateway id="Gateway_0zj4d7p" name="¿Solicitud aprobada o rechazada?">
+      <incoming>Flow_0psuoln</incoming>
+      <incoming>Flow_1x13oc6</incoming>
+      <outgoing>Flow_02h44a7</outgoing>
+      <outgoing>Flow_17xxb49</outgoing>
+    </exclusiveGateway>
+    <scriptTask id="Activity_0gxr7kb" name="Aprobación automática">
+      <extensionElements>
+        <zeebe:script expression="=&quot;aprobado&quot;" resultVariable="status_d2" />
+      </extensionElements>
+      <incoming>Flow_0h6cukx</incoming>
+      <outgoing>Flow_1x13oc6</outgoing>
+      <outgoing>Flow_1ahzqk2</outgoing>
+    </scriptTask>
+    <userTask id="Activity_05nmisw" name="Aprobación Jefe/Gerente departamento">
+      <extensionElements>
+        <zeebe:userTask />
+        <zeebe:ioMapping>
+          <zeebe:input source="=monto" target="monto" />
+          <zeebe:input source="=cumplePoliticas" target="cumplePoliticas" />
+          <zeebe:input source="=observaciones" target="observaciones" />
+          <zeebe:input source="=recomendaciones" target="recomendaciones" />
+          <zeebe:input source="=respuestaNaturalV" target="respuestaNaturalV" />
+          <zeebe:output source="=status_d2" target="status_d2" />
+        </zeebe:ioMapping>
+        <zeebe:formDefinition formId="FormularioD2" />
+        <zeebe:assignmentDefinition candidateGroups="Aprobadores" candidateUsers="millanda" />
+      </extensionElements>
+      <incoming>Flow_0cthr9h</incoming>
+      <incoming>Flow_0ecuczw</incoming>
+      <outgoing>Flow_0psuoln</outgoing>
+      <outgoing>Flow_041rgw4</outgoing>
+    </userTask>
+    <task id="Activity_05wmh64" name="Ejecutar pago automático">
+      <incoming>Flow_0qqhrt2</incoming>
+      <outgoing>Flow_057soq7</outgoing>
+    </task>
+    <businessRuleTask id="Activity_0evcnyk" name="Evaluar necesidad de aprobación según monto">
+      <extensionElements>
+        <zeebe:calledDecision decisionId="PrimeraAprobacionID" resultVariable="rulesRes" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=monto" target="monto" />
+          <zeebe:output source="=rulesRes.status_d1" target="status_d1" />
+          <zeebe:output source="=rulesRes.email_jefe" target="email_jefe" />
+          <zeebe:output source="=&quot;ID-&quot; + uuid()" target="notifica3" />
+        </zeebe:ioMapping>
+      </extensionElements>
+      <incoming>Flow_1pp9j66</incoming>
+      <outgoing>Flow_0l9uexv</outgoing>
+      <outgoing>Flow_10krwbr</outgoing>
+    </businessRuleTask>
+    <intermediateThrowEvent id="Event_03jotg0">
+      <extensionElements>
+        <zeebe:taskDefinition type="reembolso.notificacion1" retries="1" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=inicialN_ID" target="inicialN_ID" />
+        </zeebe:ioMapping>
+      </extensionElements>
+      <incoming>Flow_1e92qh0</incoming>
+      <outgoing>Flow_0rkvfaa</outgoing>
+      <messageEventDefinition id="MessageEventDefinition_0joqo0q" />
+    </intermediateThrowEvent>
+    <intermediateCatchEvent id="Event_0nii1sx">
+      <incoming>Flow_10krwbr</incoming>
+      <outgoing>Flow_11yq6jm</outgoing>
+      <messageEventDefinition id="MessageEventDefinition_010itt0" messageRef="Message_11hpmsl" />
+    </intermediateCatchEvent>
+    <boundaryEvent id="Event_15lr633" attachedToRef="Activity_05nmisw">
+      <extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:output source="=&quot;Jefe&quot;" target="personal" />
+        </zeebe:ioMapping>
+      </extensionElements>
+      <outgoing>Flow_1d32nbs</outgoing>
+      <timerEventDefinition id="TimerEventDefinition_0w3y1ha">
+        <timeDuration xsi:type="bpmn:tFormalExpression">PT1M</timeDuration>
+      </timerEventDefinition>
+    </boundaryEvent>
+    <intermediateThrowEvent id="Event_1aq2it7">
+      <extensionElements>
+        <zeebe:taskDefinition type="reembolso.notificacion3" retries="1" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=notifica3" target="notifica3" />
+        </zeebe:ioMapping>
+      </extensionElements>
+      <incoming>Flow_041rgw4</incoming>
+      <messageEventDefinition id="MessageEventDefinition_1xuaze2" />
+    </intermediateThrowEvent>
+    <boundaryEvent id="Event_1dagmza" attachedToRef="Activity_0ct3zd7">
+      <outgoing>Flow_0owbagu</outgoing>
+      <errorEventDefinition id="ErrorEventDefinition_12g8tdj" errorRef="Error_1iv1bth" />
+    </boundaryEvent>
+    <boundaryEvent id="Event_1f2212e" attachedToRef="Activity_0h9fydg">
+      <outgoing>Flow_1kbbg2v</outgoing>
+      <errorEventDefinition id="ErrorEventDefinition_1baahpr" errorRef="Error_1iv1bth" />
+    </boundaryEvent>
+    <intermediateCatchEvent id="Event_1kkjh2m">
+      <incoming>Flow_0rkvfaa</incoming>
+      <outgoing>Flow_0f15rob</outgoing>
+      <messageEventDefinition id="MessageEventDefinition_1bq1508" messageRef="Message_2bs5a96" />
+    </intermediateCatchEvent>
+    <intermediateCatchEvent id="Event_1vy5341">
+      <incoming>Flow_1oe8l6b</incoming>
+      <outgoing>Flow_09aol3n</outgoing>
+      <messageEventDefinition id="MessageEventDefinition_04icfu7" messageRef="Message_22cn3hj" />
+    </intermediateCatchEvent>
+    <intermediateThrowEvent id="Event_1yur5tq">
+      <extensionElements>
+        <zeebe:taskDefinition type="reembolso.notificacion3" retries="1" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=notifica3" target="notifica3" />
+        </zeebe:ioMapping>
+      </extensionElements>
+      <incoming>Flow_1ahzqk2</incoming>
+      <messageEventDefinition id="MessageEventDefinition_0z1jxpp" />
+    </intermediateThrowEvent>
+    <endEvent id="Event_0ibm1ec" name="Fin">
+      <incoming>Flow_0d6d00e</incoming>
+    </endEvent>
+    <sequenceFlow id="Flow_0060mla" sourceRef="Activity_1fchbt3" targetRef="Activity_0ct3zd7" />
+    <sequenceFlow id="Flow_02h44a7" sourceRef="Gateway_0zj4d7p" targetRef="Activity_1ijtxk7">
+      <conditionExpression xsi:type="bpmn:tFormalExpression">=status_d2 = "denegado"</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="Flow_041rgw4" sourceRef="Activity_05nmisw" targetRef="Event_1aq2it7" />
+    <sequenceFlow id="Flow_057soq7" sourceRef="Activity_05wmh64" targetRef="Activity_1367sg1" />
+    <sequenceFlow id="Flow_09aol3n" sourceRef="Event_1vy5341" targetRef="Activity_1kbfccu" />
+    <sequenceFlow id="Flow_0cthr9h" sourceRef="Gateway_02gm3vi" targetRef="Activity_05nmisw">
+      <conditionExpression xsi:type="bpmn:tFormalExpression">=status_d1 in ["REQUIERE_JEFE1", "REQUIERE_JEFE2", "REQUIERE_JEFE3", "REQUIERE_JEFE4","REQUIERE_GERENTE"]</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="Flow_0d6d00e" sourceRef="Activity_1367sg1" targetRef="Event_0ibm1ec" />
+    <sequenceFlow id="Flow_0ecuczw" sourceRef="Activity_0686kpa" targetRef="Activity_05nmisw" />
+    <sequenceFlow id="Flow_0f15rob" sourceRef="Event_1kkjh2m" targetRef="Activity_1caeq6p" />
+    <sequenceFlow id="Flow_0h6cukx" sourceRef="Gateway_02gm3vi" targetRef="Activity_0gxr7kb">
+      <conditionExpression xsi:type="bpmn:tFormalExpression">=status_d1 = "APROBACION_AUTOMATICA"</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="Flow_0l9uexv" sourceRef="Activity_0evcnyk" targetRef="Gateway_02gm3vi" />
+    <sequenceFlow id="Flow_0mm6ve0" sourceRef="Activity_0ct3zd7" targetRef="Gateway_00dpjhf" />
+    <sequenceFlow id="Flow_0owbagu" sourceRef="Event_1dagmza" targetRef="Activity_0fe9obs" />
+    <sequenceFlow id="Flow_0psuoln" sourceRef="Activity_05nmisw" targetRef="Gateway_0zj4d7p" />
+    <sequenceFlow id="Flow_0qqhrt2" sourceRef="Activity_1a29oxg" targetRef="Activity_05wmh64" />
+    <sequenceFlow id="Flow_0rkvfaa" sourceRef="Event_03jotg0" targetRef="Event_1kkjh2m" />
+    <sequenceFlow id="Flow_0y8zreg" sourceRef="Activity_052r1ge" targetRef="Activity_1fchbt3" />
+    <sequenceFlow id="Flow_10krwbr" sourceRef="Activity_0evcnyk" targetRef="Event_0nii1sx" />
+    <sequenceFlow id="Flow_11yq6jm" sourceRef="Event_0nii1sx" targetRef="Activity_1tkcx1y" />
+    <sequenceFlow id="Flow_17xxb49" sourceRef="Gateway_0zj4d7p" targetRef="Activity_1a29oxg">
+      <conditionExpression xsi:type="bpmn:tFormalExpression">=status_d2 = "aprobado"</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="Flow_1ahzqk2" sourceRef="Activity_0gxr7kb" targetRef="Event_1yur5tq" />
+    <sequenceFlow id="Flow_1d32nbs" sourceRef="Event_15lr633" targetRef="Activity_0686kpa" />
+    <sequenceFlow id="Flow_1e92qh0" sourceRef="StartEvent_1" targetRef="Event_03jotg0" />
+    <sequenceFlow id="Flow_1hps6ku" sourceRef="Activity_0fe9obs" targetRef="Event_1n6r35u" />
+    <sequenceFlow id="Flow_1k4x31c" sourceRef="Activity_0h9fydg" targetRef="Activity_1uvyvsb" />
+    <sequenceFlow id="Flow_1kbbg2v" sourceRef="Event_1f2212e" targetRef="Activity_0fe9obs" />
+    <sequenceFlow id="Flow_1kpq70v" sourceRef="Activity_1ijtxk7" targetRef="Event_02ubrpb" />
+    <sequenceFlow id="Flow_1oe8l6b" sourceRef="Activity_0ct3zd7" targetRef="Event_1vy5341" />
+    <sequenceFlow id="Flow_1pp9j66" sourceRef="Activity_1uvyvsb" targetRef="Activity_0evcnyk" />
+    <sequenceFlow id="Flow_1x13oc6" sourceRef="Activity_0gxr7kb" targetRef="Gateway_0zj4d7p" />
+    <startEvent id="StartEvent_1" name="Inicio&#10;(Envió de formulario Web )">
+      <extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:output source="=&quot;ID-&quot; + uuid()" target="inicialN_ID" />
+        </zeebe:ioMapping>
+      </extensionElements>
+      <outgoing>Flow_0rcrkol</outgoing>
+      <outgoing>Flow_1e92qh0</outgoing>
+    </startEvent>
+    <serviceTask id="Activity_1uvyvsb" name="Limpiar Respuesta LLM">
+      <extensionElements>
+        <zeebe:taskDefinition type="reembolso.limpiar_respuesta" retries="3" />
+      </extensionElements>
+      <incoming>Flow_1k4x31c</incoming>
+      <outgoing>Flow_1pp9j66</outgoing>
+    </serviceTask>
+    <serviceTask id="Activity_0fe9obs" name="Manejo de Errores del servidor / Documentación no Valida" zeebe:modelerTemplate="io.camunda.connectors.email.v1" zeebe:modelerTemplateVersion="3" zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzkwXzI0MjApIj4KPHBhdGggZD0iTTguMzM4MzUgOS45NTM2NUwxMC4zODk0IDEyLjAxMDRMOC4zMzI2MiAxNC4wNjcyTDkuMTQ2MTYgMTQuODc1TDEyLjAxMDcgMTIuMDEwNEw5LjE0NjE2IDkuMTQ1ODNMOC4zMzgzNSA5Ljk1MzY1WiIgZmlsbD0iYmxhY2siLz4KPHBhdGggZD0iTTEyLjM0ODggOS45NTM2NUwxNC4zOTk4IDEyLjAxMDRMMTIuMzQzIDE0LjA2NzJMMTMuMTU2NiAxNC44NzVMMTYuMDIxMiAxMi4wMTA0TDEzLjE1NjYgOS4xNDU4M0wxMi4zNDg4IDkuOTUzNjVaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNMy45NzIgMTEuNDM3NUgxLjEyNTMzVjIuNzkyMTlMNy42NzM3NiA3LjMyMzk2QzcuNzY5NjcgNy4zOTA0OSA3Ljg4MzYgNy40MjYxNCA4LjAwMDMyIDcuNDI2MTRDOC4xMTcwNSA3LjQyNjE0IDguMjMwOTggNy4zOTA0OSA4LjMyNjg5IDcuMzIzOTZMMTQuODc1MyAyLjc5MjE5VjhIMTYuMDIxMlYyLjI3MDgzQzE2LjAyMTIgMS45NjY5NCAxNS45MDA0IDEuNjc1NDkgMTUuNjg1NiAxLjQ2MDYxQzE1LjQ3MDcgMS4yNDU3MiAxNS4xNzkyIDEuMTI1IDE0Ljg3NTMgMS4xMjVIMS4xMjUzM0MwLjgyMTQzMiAxLjEyNSAwLjUyOTk4NCAxLjI0NTcyIDAuMzE1MDk5IDEuNDYwNjFDMC4xMDAyMTQgMS42NzU0OSAtMC4wMjA1MDc4IDEuOTY2OTQgLTAuMDIwNTA3OCAyLjI3MDgzVjExLjQzNzVDLTAuMDIwNTA3OCAxMS43NDE0IDAuMTAwMjE0IDEyLjAzMjggMC4zMTUwOTkgMTIuMjQ3N0MwLjUyOTk4NCAxMi40NjI2IDAuODIxNDMyIDEyLjU4MzMgMS4xMjUzMyAxMi41ODMzSDMuOTcyVjExLjQzNzVaTTEzLjYxNDkgMi4yNzA4M0w4LjAwMDMyIDYuMTU1MjFMMi4zODU3NCAyLjI3MDgzSDEzLjYxNDlaIiBmaWxsPSIjRkM1RDBEIi8+CjxwYXRoIGQ9Ik00LjI4MjEgOS45NTM2NUw2LjMzMzE0IDEyLjAxMDRMNC4yNzYzNyAxNC4wNjcyTDUuMDg5OTEgMTQuODc1TDcuOTU0NDkgMTIuMDEwNEw1LjA4OTkxIDkuMTQ1ODNMNC4yODIxIDkuOTUzNjVaIiBmaWxsPSJibGFjayIvPgo8L2c+CjxkZWZzPgo8Y2xpcFBhdGggaWQ9ImNsaXAwXzkwXzI0MjAiPgo8cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+Cg==">
+      <extensionElements>
+        <zeebe:taskDefinition type="io.camunda:email:1" retries="3" />
+        <zeebe:ioMapping>
+          <zeebe:input source="simple" target="authentication.type" />
+          <zeebe:input source="edi282000@gmail.com" target="authentication.username" />
+          <zeebe:input source="dqhkvdwtmyqxcgik" target="authentication.password" />
+          <zeebe:input source="smtp" target="protocol" />
+          <zeebe:input source="smtp.gmail.com" target="data.smtpConfig.smtpHost" />
+          <zeebe:input source="587" target="data.smtpConfig.smtpPort" />
+          <zeebe:input source="TLS" target="data.smtpConfig.smtpCryptographicProtocol" />
+          <zeebe:input source="sendEmailSmtp" target="data.smtpActionDiscriminator" />
+          <zeebe:input source="edi282000@gmail.com" target="data.smtpAction.from" />
+          <zeebe:input source="=correo" target="data.smtpAction.to" />
+          <zeebe:input source="Error al Validar sus Datos de Empleado" target="data.smtpAction.subject" />
+          <zeebe:input source="HTML" target="data.smtpAction.contentType" />
+          <zeebe:input target="data.smtpAction.htmlBody" source="&quot;&lt;h1&gt;Notificación del Sistema&lt;/h1&gt;&lt;p&gt;Este es un mensaje automático del sistema de reembolsos.&lt;/p&gt;&quot;" />
+        </zeebe:ioMapping>
+        <zeebe:taskHeaders>
+          <zeebe:header key="elementTemplateVersion" value="3" />
+          <zeebe:header key="elementTemplateId" value="io.camunda.connectors.email.v1" />
+          <zeebe:header key="retryBackoff" value="PT0S" />
+        </zeebe:taskHeaders>
+      </extensionElements>
+      <incoming>Flow_1m0b44d</incoming>
+      <incoming>Flow_0owbagu</incoming>
+      <incoming>Flow_1kbbg2v</incoming>
+      <outgoing>Flow_1hps6ku</outgoing>
+    </serviceTask>
+    <sequenceFlow id="Flow_1m0b44d" name="No / Default" sourceRef="Gateway_00dpjhf" targetRef="Activity_0fe9obs" />
+    <serviceTask id="Activity_1caeq6p" name="Notificación de Inicio de Solicitud" zeebe:modelerTemplate="io.camunda.connectors.email.v1" zeebe:modelerTemplateVersion="3" zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzkwXzI0MjApIj4KPHBhdGggZD0iTTguMzM4MzUgOS45NTM2NUwxMC4zODk0IDEyLjAxMDRMOC4zMzI2MiAxNC4wNjcyTDkuMTQ2MTYgMTQuODc1TDEyLjAxMDcgMTIuMDEwNEw5LjE0NjE2IDkuMTQ1ODNMOC4zMzgzNSA5Ljk1MzY1WiIgZmlsbD0iYmxhY2siLz4KPHBhdGggZD0iTTEyLjM0ODggOS45NTM2NUwxNC4zOTk4IDEyLjAxMDRMMTIuMzQzIDE0LjA2NzJMMTMuMTU2NiAxNC44NzVMMTYuMDIxMiAxMi4wMTA0TDEzLjE1NjYgOS4xNDU4M0wxMi4zNDg4IDkuOTUzNjVaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNMy45NzIgMTEuNDM3NUgxLjEyNTMzVjIuNzkyMTlMNy42NzM3NiA3LjMyMzk2QzcuNzY5NjcgNy4zOTA0OSA3Ljg4MzYgNy40MjYxNCA4LjAwMDMyIDcuNDI2MTRDOC4xMTcwNSA3LjQyNjE0IDguMjMwOTggNy4zOTA0OSA4LjMyNjg5IDcuMzIzOTZMMTQuODc1MyAyLjc5MjE5VjhIMTYuMDIxMlYyLjI3MDgzQzE2LjAyMTIgMS45NjY5NCAxNS45MDA0IDEuNjc1NDkgMTUuNjg1NiAxLjQ2MDYxQzE1LjQ3MDcgMS4yNDU3MiAxNS4xNzkyIDEuMTI1IDE0Ljg3NTMgMS4xMjVIMS4xMjUzM0MwLjgyMTQzMiAxLjEyNSAwLjUyOTk4NCAxLjI0NTcyIDAuMzE1MDk5IDEuNDYwNjFDMC4xMDAyMTQgMS42NzU0OSAtMC4wMjA1MDc4IDEuOTY2OTQgLTAuMDIwNTA3OCAyLjI3MDgzVjExLjQzNzVDLTAuMDIwNTA3OCAxMS43NDE0IDAuMTAwMjE0IDEyLjAzMjggMC4zMTUwOTkgMTIuMjQ3N0MwLjUyOTk4NCAxMi40NjI2IDAuODIxNDMyIDEyLjU4MzMgMS4xMjUzMyAxMi41ODMzSDMuOTcyVjExLjQzNzVaTTEzLjYxNDkgMi4yNzA4M0w4LjAwMDMyIDYuMTU1MjFMMi4zODU3NCAyLjI3MDgzSDEzLjYxNDlaIiBmaWxsPSIjRkM1RDBEIi8+CjxwYXRoIGQ9Ik00LjI4MjEgOS45NTM2NUw2LjMzMzE0IDEyLjAxMDRMNC4yNzYzNyAxNC4wNjcyTDUuMDg5OTEgMTQuODc1TDcuOTU0NDkgMTIuMDEwNEw1LjA4OTkxIDkuMTQ1ODNMNC4yODIxIDkuOTUzNjVaIiBmaWxsPSJibGFjayIvPgo8L2c+CjxkZWZzPgo8Y2xpcFBhdGggaWQ9ImNsaXAwXzkwXzI0MjAiPgo8cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+Cg==">
+      <extensionElements>
+        <zeebe:taskDefinition type="io.camunda:email:1" retries="3" />
+        <zeebe:ioMapping>
+          <zeebe:input source="simple" target="authentication.type" />
+          <zeebe:input source="edi282000@gmail.com" target="authentication.username" />
+          <zeebe:input source="dqhkvdwtmyqxcgik" target="authentication.password" />
+          <zeebe:input source="smtp" target="protocol" />
+          <zeebe:input source="smtp.gmail.com" target="data.smtpConfig.smtpHost" />
+          <zeebe:input source="587" target="data.smtpConfig.smtpPort" />
+          <zeebe:input source="TLS" target="data.smtpConfig.smtpCryptographicProtocol" />
+          <zeebe:input source="sendEmailSmtp" target="data.smtpActionDiscriminator" />
+          <zeebe:input source="edi282000@gmail.com" target="data.smtpAction.from" />
+          <zeebe:input source="=correo" target="data.smtpAction.to" />
+          <zeebe:input source="Solicitud de Reembolso Iniciada" target="data.smtpAction.subject" />
+          <zeebe:input source="HTML" target="data.smtpAction.contentType" />
+          <zeebe:input target="data.smtpAction.htmlBody" source="&quot;&lt;h1&gt;Notificación del Sistema&lt;/h1&gt;&lt;p&gt;Este es un mensaje automático del sistema de reembolsos.&lt;/p&gt;&quot;" />
+        </zeebe:ioMapping>
+        <zeebe:taskHeaders>
+          <zeebe:header key="elementTemplateVersion" value="3" />
+          <zeebe:header key="elementTemplateId" value="io.camunda.connectors.email.v1" />
+          <zeebe:header key="retryBackoff" value="PT0S" />
+        </zeebe:taskHeaders>
+      </extensionElements>
+      <incoming>Flow_0f15rob</incoming>
+    </serviceTask>
+    <serviceTask id="Activity_1kbfccu" name="Notificación de Primera Etapa" zeebe:modelerTemplate="io.camunda.connectors.email.v1" zeebe:modelerTemplateVersion="3" zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzkwXzI0MjApIj4KPHBhdGggZD0iTTguMzM4MzUgOS45NTM2NUwxMC4zODk0IDEyLjAxMDRMOC4zMzI2MiAxNC4wNjcyTDkuMTQ2MTYgMTQuODc1TDEyLjAxMDcgMTIuMDEwNEw5LjE0NjE2IDkuMTQ1ODNMOC4zMzgzNSA5Ljk1MzY1WiIgZmlsbD0iYmxhY2siLz4KPHBhdGggZD0iTTEyLjM0ODggOS45NTM2NUwxNC4zOTk4IDEyLjAxMDRMMTIuMzQzIDE0LjA2NzJMMTMuMTU2NiAxNC44NzVMMTYuMDIxMiAxMi4wMTA0TDEzLjE1NjYgOS4xNDU4M0wxMi4zNDg4IDkuOTUzNjVaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNMy45NzIgMTEuNDM3NUgxLjEyNTMzVjIuNzkyMTlMNy42NzM3NiA3LjMyMzk2QzcuNzY5NjcgNy4zOTA0OSA3Ljg4MzYgNy40MjYxNCA4LjAwMDMyIDcuNDI2MTRDOC4xMTcwNSA3LjQyNjE0IDguMjMwOTggNy4zOTA0OSA4LjMyNjg5IDcuMzIzOTZMMTQuODc1MyAyLjc5MjE5VjhIMTYuMDIxMlYyLjI3MDgzQzE2LjAyMTIgMS45NjY5NCAxNS45MDA0IDEuNjc1NDkgMTUuNjg1NiAxLjQ2MDYxQzE1LjQ3MDcgMS4yNDU3MiAxNS4xNzkyIDEuMTI1IDE0Ljg3NTMgMS4xMjVIMS4xMjUzM0MwLjgyMTQzMiAxLjEyNSAwLjUyOTk4NCAxLjI0NTcyIDAuMzE1MDk5IDEuNDYwNjFDMC4xMDAyMTQgMS42NzU0OSAtMC4wMjA1MDc4IDEuOTY2OTQgLTAuMDIwNTA3OCAyLjI3MDgzVjExLjQzNzVDLTAuMDIwNTA3OCAxMS43NDE0IDAuMTAwMjE0IDEyLjAzMjggMC4zMTUwOTkgMTIuMjQ3N0MwLjUyOTk4NCAxMi40NjI2IDAuODIxNDMyIDEyLjU4MzMgMS4xMjUzMyAxMi41ODMzSDMuOTcyVjExLjQzNzVaTTEzLjYxNDkgMi4yNzA4M0w4LjAwMDMyIDYuMTU1MjFMMi4zODU3NCAyLjI3MDgzSDEzLjYxNDlaIiBmaWxsPSIjRkM1RDBEIi8+CjxwYXRoIGQ9Ik00LjI4MjEgOS45NTM2NUw2LjMzMzE0IDEyLjAxMDRMNC4yNzYzNyAxNC4wNjcyTDUuMDg5OTEgMTQuODc1TDcuOTU0NDkgMTIuMDEwNEw1LjA4OTkxIDkuMTQ1ODNMNC4yODIxIDkuOTUzNjVaIiBmaWxsPSJibGFjayIvPgo8L2c+CjxkZWZzPgo8Y2xpcFBhdGggaWQ9ImNsaXAwXzkwXzI0MjAiPgo8cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+Cg==">
+      <extensionElements>
+        <zeebe:taskDefinition type="io.camunda:email:1" retries="3" />
+        <zeebe:ioMapping>
+          <zeebe:input source="simple" target="authentication.type" />
+          <zeebe:input source="edi282000@gmail.com" target="authentication.username" />
+          <zeebe:input source="edi282000@gmail.com" target="authentication.password" />
+          <zeebe:input source="smtp" target="protocol" />
+          <zeebe:input source="smtp.gmail.com" target="data.smtpConfig.smtpHost" />
+          <zeebe:input source="587" target="data.smtpConfig.smtpPort" />
+          <zeebe:input source="TLS" target="data.smtpConfig.smtpCryptographicProtocol" />
+          <zeebe:input source="sendEmailSmtp" target="data.smtpActionDiscriminator" />
+          <zeebe:input source="edi282000@gmail.com" target="data.smtpAction.from" />
+          <zeebe:input source="=correo" target="data.smtpAction.to" />
+          <zeebe:input source="Notificación Primera Etapa" target="data.smtpAction.subject" />
+          <zeebe:input source="HTML" target="data.smtpAction.contentType" />
+          <zeebe:input target="data.smtpAction.htmlBody" source="&quot;&lt;h1&gt;Notificación del Sistema&lt;/h1&gt;&lt;p&gt;Este es un mensaje automático del sistema de reembolsos.&lt;/p&gt;&quot;" />
+        </zeebe:ioMapping>
+        <zeebe:taskHeaders>
+          <zeebe:header key="elementTemplateVersion" value="3" />
+          <zeebe:header key="elementTemplateId" value="io.camunda.connectors.email.v1" />
+          <zeebe:header key="retryBackoff" value="PT0S" />
+        </zeebe:taskHeaders>
+      </extensionElements>
+      <incoming>Flow_09aol3n</incoming>
+    </serviceTask>
+    <serviceTask id="Activity_1tkcx1y" name="Notificación de Segunda Etapa" zeebe:modelerTemplate="io.camunda.connectors.email.v1" zeebe:modelerTemplateVersion="3" zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzkwXzI0MjApIj4KPHBhdGggZD0iTTguMzM4MzUgOS45NTM2NUwxMC4zODk0IDEyLjAxMDRMOC4zMzI2MiAxNC4wNjcyTDkuMTQ2MTYgMTQuODc1TDEyLjAxMDcgMTIuMDEwNEw5LjE0NjE2IDkuMTQ1ODNMOC4zMzgzNSA5Ljk1MzY1WiIgZmlsbD0iYmxhY2siLz4KPHBhdGggZD0iTTEyLjM0ODggOS45NTM2NUwxNC4zOTk4IDEyLjAxMDRMMTIuMzQzIDE0LjA2NzJMMTMuMTU2NiAxNC44NzVMMTYuMDIxMiAxMi4wMTA0TDEzLjE1NjYgOS4xNDU4M0wxMi4zNDg4IDkuOTUzNjVaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNMy45NzIgMTEuNDM3NUgxLjEyNTMzVjIuNzkyMTlMNy42NzM3NiA3LjMyMzk2QzcuNzY5NjcgNy4zOTA0OSA3Ljg4MzYgNy40MjYxNCA4LjAwMDMyIDcuNDI2MTRDOC4xMTcwNSA3LjQyNjE0IDguMjMwOTggNy4zOTA0OSA4LjMyNjg5IDcuMzIzOTZMMTQuODc1MyAyLjc5MjE5VjhIMTYuMDIxMlYyLjI3MDgzQzE2LjAyMTIgMS45NjY5NCAxNS45MDA0IDEuNjc1NDkgMTUuNjg1NiAxLjQ2MDYxQzE1LjQ3MDcgMS4yNDU3MiAxNS4xNzkyIDEuMTI1IDE0Ljg3NTMgMS4xMjVIMS4xMjUzM0MwLjgyMTQzMiAxLjEyNSAwLjUyOTk4NCAxLjI0NTcyIDAuMzE1MDk5IDEuNDYwNjFDMC4xMDAyMTQgMS42NzU0OSAtMC4wMjA1MDc4IDEuOTY2OTQgLTAuMDIwNTA3OCAyLjI3MDgzVjExLjQzNzVDLTAuMDIwNTA3OCAxMS43NDE0IDAuMTAwMjE0IDEyLjAzMjggMC4zMTUwOTkgMTIuMjQ3N0MwLjUyOTk4NCAxMi40NjI2IDAuODIxNDMyIDEyLjU4MzMgMS4xMjUzMyAxMi41ODMzSDMuOTcyVjExLjQzNzVaTTEzLjYxNDkgMi4yNzA4M0w4LjAwMDMyIDYuMTU1MjFMMi4zODU3NCAyLjI3MDgzSDEzLjYxNDlaIiBmaWxsPSIjRkM1RDBEIi8+CjxwYXRoIGQ9Ik00LjI4MjEgOS45NTM2NUw2LjMzMzE0IDEyLjAxMDRMNC4yNzYzNyAxNC4wNjcyTDUuMDg5OTEgMTQuODc1TDcuOTU0NDkgMTIuMDEwNEw1LjA4OTkxIDkuMTQ1ODNMNC4yODIxIDkuOTUzNjVaIiBmaWxsPSJibGFjayIvPgo8L2c+CjxkZWZzPgo8Y2xpcFBhdGggaWQ9ImNsaXAwXzkwXzI0MjAiPgo8cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+Cg==">
+      <extensionElements>
+        <zeebe:taskDefinition type="io.camunda:email:1" retries="3" />
+        <zeebe:ioMapping>
+          <zeebe:input source="simple" target="authentication.type" />
+          <zeebe:input source="edi282000@gmail.com" target="authentication.username" />
+          <zeebe:input source="dqhkvdwtmyqxcgik" target="authentication.password" />
+          <zeebe:input source="smtp" target="protocol" />
+          <zeebe:input source="smtp.gmail.com" target="data.smtpConfig.smtpHost" />
+          <zeebe:input source="587" target="data.smtpConfig.smtpPort" />
+          <zeebe:input source="TLS" target="data.smtpConfig.smtpCryptographicProtocol" />
+          <zeebe:input source="sendEmailSmtp" target="data.smtpActionDiscriminator" />
+          <zeebe:input source="edi282000@gmail.com" target="data.smtpAction.from" />
+          <zeebe:input source="=correo" target="data.smtpAction.to" />
+          <zeebe:input source="Notificación Segunda Etapa" target="data.smtpAction.subject" />
+          <zeebe:input source="HTML" target="data.smtpAction.contentType" />
+          <zeebe:input target="data.smtpAction.htmlBody" source="&quot;&lt;h1&gt;Notificación del Sistema&lt;/h1&gt;&lt;p&gt;Este es un mensaje automático del sistema de reembolsos.&lt;/p&gt;&quot;" />
+        </zeebe:ioMapping>
+        <zeebe:taskHeaders>
+          <zeebe:header key="elementTemplateVersion" value="3" />
+          <zeebe:header key="elementTemplateId" value="io.camunda.connectors.email.v1" />
+          <zeebe:header key="retryBackoff" value="PT0S" />
+        </zeebe:taskHeaders>
+      </extensionElements>
+      <incoming>Flow_11yq6jm</incoming>
+    </serviceTask>
+    <serviceTask id="Activity_0686kpa" name="Notificación de Solicitud de Reembolso sin Atender" zeebe:modelerTemplate="io.camunda.connectors.email.v1" zeebe:modelerTemplateVersion="3" zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzkwXzI0MjApIj4KPHBhdGggZD0iTTguMzM4MzUgOS45NTM2NUwxMC4zODk0IDEyLjAxMDRMOC4zMzI2MiAxNC4wNjcyTDkuMTQ2MTYgMTQuODc1TDEyLjAxMDcgMTIuMDEwNEw5LjE0NjE2IDkuMTQ1ODNMOC4zMzgzNSA5Ljk1MzY1WiIgZmlsbD0iYmxhY2siLz4KPHBhdGggZD0iTTEyLjM0ODggOS45NTM2NUwxNC4zOTk4IDEyLjAxMDRMMTIuMzQzIDE0LjA2NzJMMTMuMTU2NiAxNC44NzVMMTYuMDIxMiAxMi4wMTA0TDEzLjE1NjYgOS4xNDU4M0wxMi4zNDg4IDkuOTUzNjVaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNMy45NzIgMTEuNDM3NUgxLjEyNTMzVjIuNzkyMTlMNy42NzM3NiA3LjMyMzk2QzcuNzY5NjcgNy4zOTA0OSA3Ljg4MzYgNy40MjYxNCA4LjAwMDMyIDcuNDI2MTRDOC4xMTcwNSA3LjQyNjE0IDguMjMwOTggNy4zOTA0OSA4LjMyNjg5IDcuMzIzOTZMMTQuODc1MyAyLjc5MjE5VjhIMTYuMDIxMlYyLjI3MDgzQzE2LjAyMTIgMS45NjY5NCAxNS45MDA0IDEuNjc1NDkgMTUuNjg1NiAxLjQ2MDYxQzE1LjQ3MDcgMS4yNDU3MiAxNS4xNzkyIDEuMTI1IDE0Ljg3NTMgMS4xMjVIMS4xMjUzM0MwLjgyMTQzMiAxLjEyNSAwLjUyOTk4NCAxLjI0NTcyIDAuMzE1MDk5IDEuNDYwNjFDMC4xMDAyMTQgMS42NzU0OSAtMC4wMjA1MDc4IDEuOTY2OTQgLTAuMDIwNTA3OCAyLjI3MDgzVjExLjQzNzVDLTAuMDIwNTA3OCAxMS43NDE0IDAuMTAwMjE0IDEyLjAzMjggMC4zMTUwOTkgMTIuMjQ3N0MwLjUyOTk4NCAxMi40NjI2IDAuODIxNDMyIDEyLjU4MzMgMS4xMjUzMyAxMi41ODMzSDMuOTcyVjExLjQzNzVaTTEzLjYxNDkgMi4yNzA4M0w4LjAwMDMyIDYuMTU1MjFMMi4zODU3NCAyLjI3MDgzSDEzLjYxNDlaIiBmaWxsPSIjRkM1RDBEIi8+CjxwYXRoIGQ9Ik00LjI4MjEgOS45NTM2NUw2LjMzMzE0IDEyLjAxMDRMNC4yNzYzNyAxNC4wNjcyTDUuMDg5OTEgMTQuODc1TDcuOTU0NDkgMTIuMDEwNEw1LjA4OTkxIDkuMTQ1ODNMNC4yODIxIDkuOTUzNjVaIiBmaWxsPSJibGFjayIvPgo8L2c+CjxkZWZzPgo8Y2xpcFBhdGggaWQ9ImNsaXAwXzkwXzI0MjAiPgo8cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+Cg==">
+      <extensionElements>
+        <zeebe:taskDefinition type="io.camunda:email:1" retries="3" />
+        <zeebe:ioMapping>
+          <zeebe:input source="simple" target="authentication.type" />
+          <zeebe:input source="edi282000@gmail.com" target="authentication.username" />
+          <zeebe:input source="dqhkvdwtmyqxcgik" target="authentication.password" />
+          <zeebe:input source="smtp" target="protocol" />
+          <zeebe:input source="smtp.gmail.com" target="data.smtpConfig.smtpHost" />
+          <zeebe:input source="587" target="data.smtpConfig.smtpPort" />
+          <zeebe:input source="TLS" target="data.smtpConfig.smtpCryptographicProtocol" />
+          <zeebe:input source="sendEmailSmtp" target="data.smtpActionDiscriminator" />
+          <zeebe:input source="edi282000@gmail.com" target="data.smtpAction.from" />
+          <zeebe:input source="=email_jefe" target="data.smtpAction.to" />
+          <zeebe:input source="Recordatorio Solicitud Pendiente" target="data.smtpAction.subject" />
+          <zeebe:input source="HTML" target="data.smtpAction.contentType" />
+          <zeebe:input target="data.smtpAction.htmlBody" source="&quot;&lt;h1&gt;Notificación del Sistema&lt;/h1&gt;&lt;p&gt;Este es un mensaje automático del sistema de reembolsos.&lt;/p&gt;&quot;" />
+        </zeebe:ioMapping>
+        <zeebe:taskHeaders>
+          <zeebe:header key="elementTemplateVersion" value="3" />
+          <zeebe:header key="elementTemplateId" value="io.camunda.connectors.email.v1" />
+          <zeebe:header key="retryBackoff" value="PT0S" />
+        </zeebe:taskHeaders>
+      </extensionElements>
+      <incoming>Flow_1d32nbs</incoming>
+      <outgoing>Flow_0ecuczw</outgoing>
+    </serviceTask>
+    <serviceTask id="Activity_1367sg1" name="Notificar al empleado que el reembolso fue procesado" zeebe:modelerTemplate="io.camunda.connectors.email.v1" zeebe:modelerTemplateVersion="3" zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzkwXzI0MjApIj4KPHBhdGggZD0iTTguMzM4MzUgOS45NTM2NUwxMC4zODk0IDEyLjAxMDRMOC4zMzI2MiAxNC4wNjcyTDkuMTQ2MTYgMTQuODc1TDEyLjAxMDcgMTIuMDEwNEw5LjE0NjE2IDkuMTQ1ODNMOC4zMzgzNSA5Ljk1MzY1WiIgZmlsbD0iYmxhY2siLz4KPHBhdGggZD0iTTEyLjM0ODggOS45NTM2NUwxNC4zOTk4IDEyLjAxMDRMMTIuMzQzIDE0LjA2NzJMMTMuMTU2NiAxNC44NzVMMTYuMDIxMiAxMi4wMTA0TDEzLjE1NjYgOS4xNDU4M0wxMi4zNDg4IDkuOTUzNjVaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNMy45NzIgMTEuNDM3NUgxLjEyNTMzVjIuNzkyMTlMNy42NzM3NiA3LjMyMzk2QzcuNzY5NjcgNy4zOTA0OSA3Ljg4MzYgNy40MjYxNCA4LjAwMDMyIDcuNDI2MTRDOC4xMTcwNSA3LjQyNjE0IDguMjMwOTggNy4zOTA0OSA4LjMyNjg5IDcuMzIzOTZMMTQuODc1MyAyLjc5MjE5VjhIMTYuMDIxMlYyLjI3MDgzQzE2LjAyMTIgMS45NjY5NCAxNS45MDA0IDEuNjc1NDkgMTUuNjg1NiAxLjQ2MDYxQzE1LjQ3MDcgMS4yNDU3MiAxNS4xNzkyIDEuMTI1IDE0Ljg3NTMgMS4xMjVIMS4xMjUzM0MwLjgyMTQzMiAxLjEyNSAwLjUyOTk4NCAxLjI0NTcyIDAuMzE1MDk5IDEuNDYwNjFDMC4xMDAyMTQgMS42NzU0OSAtMC4wMjA1MDc4IDEuOTY2OTQgLTAuMDIwNTA3OCAyLjI3MDgzVjExLjQzNzVDLTAuMDIwNTA3OCAxMS43NDE0IDAuMTAwMjE0IDEyLjAzMjggMC4zMTUwOTkgMTIuMjQ3N0MwLjUyOTk4NCAxMi40NjI2IDAuODIxNDMyIDEyLjU4MzMgMS4xMjUzMyAxMi41ODMzSDMuOTcyVjExLjQzNzVaTTEzLjYxNDkgMi4yNzA4M0w4LjAwMDMyIDYuMTU1MjFMMi4zODU3NCAyLjI3MDgzSDEzLjYxNDlaIiBmaWxsPSIjRkM1RDBEIi8+CjxwYXRoIGQ9Ik00LjI4MjEgOS45NTM2NUw2LjMzMzE0IDEyLjAxMDRMNC4yNzYzNyAxNC4wNjcyTDUuMDg5OTEgMTQuODc1TDcuOTU0NDkgMTIuMDEwNEw1LjA4OTkxIDkuMTQ1ODNMNC4yODIxIDkuOTUzNjVaIiBmaWxsPSJibGFjayIvPgo8L2c+CjxkZWZzPgo8Y2xpcFBhdGggaWQ9ImNsaXAwXzkwXzI0MjAiPgo8cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+Cg==">
+      <extensionElements>
+        <zeebe:taskDefinition type="io.camunda:email:1" retries="3" />
+        <zeebe:ioMapping>
+          <zeebe:input source="simple" target="authentication.type" />
+          <zeebe:input source="edi282000@gmail.com" target="authentication.username" />
+          <zeebe:input source="dqhkvdwtmyqxcgik" target="authentication.password" />
+          <zeebe:input source="smtp" target="protocol" />
+          <zeebe:input source="smtp.gmail.com" target="data.smtpConfig.smtpHost" />
+          <zeebe:input source="587" target="data.smtpConfig.smtpPort" />
+          <zeebe:input source="TLS" target="data.smtpConfig.smtpCryptographicProtocol" />
+          <zeebe:input source="sendEmailSmtp" target="data.smtpActionDiscriminator" />
+          <zeebe:input source="edi282000@gmail.com" target="data.smtpAction.from" />
+          <zeebe:input source="=correo" target="data.smtpAction.to" />
+          <zeebe:input source="Notificación de Reembolso" target="data.smtpAction.subject" />
+          <zeebe:input source="HTML" target="data.smtpAction.contentType" />
+          <zeebe:input target="data.smtpAction.htmlBody" source="&quot;&lt;h1&gt;Notificación del Sistema&lt;/h1&gt;&lt;p&gt;Este es un mensaje automático del sistema de reembolsos.&lt;/p&gt;&quot;" />
+        </zeebe:ioMapping>
+        <zeebe:taskHeaders>
+          <zeebe:header key="elementTemplateVersion" value="3" />
+          <zeebe:header key="elementTemplateId" value="io.camunda.connectors.email.v1" />
+          <zeebe:header key="retryBackoff" value="PT0S" />
+        </zeebe:taskHeaders>
+      </extensionElements>
+      <incoming>Flow_057soq7</incoming>
+      <outgoing>Flow_0d6d00e</outgoing>
+    </serviceTask>
+    <serviceTask id="Activity_1ijtxk7" name="Notificar rechazo al empleado" zeebe:modelerTemplate="io.camunda.connectors.email.v1" zeebe:modelerTemplateVersion="3" zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzkwXzI0MjApIj4KPHBhdGggZD0iTTguMzM4MzUgOS45NTM2NUwxMC4zODk0IDEyLjAxMDRMOC4zMzI2MiAxNC4wNjcyTDkuMTQ2MTYgMTQuODc1TDEyLjAxMDcgMTIuMDEwNEw5LjE0NjE2IDkuMTQ1ODNMOC4zMzgzNSA5Ljk1MzY1WiIgZmlsbD0iYmxhY2siLz4KPHBhdGggZD0iTTEyLjM0ODggOS45NTM2NUwxNC4zOTk4IDEyLjAxMDRMMTIuMzQzIDE0LjA2NzJMMTMuMTU2NiAxNC44NzVMMTYuMDIxMiAxMi4wMTA0TDEzLjE1NjYgOS4xNDU4M0wxMi4zNDg4IDkuOTUzNjVaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNMy45NzIgMTEuNDM3NUgxLjEyNTMzVjIuNzkyMTlMNy42NzM3NiA3LjMyMzk2QzcuNzY5NjcgNy4zOTA0OSA3Ljg4MzYgNy40MjYxNCA4LjAwMDMyIDcuNDI2MTRDOC4xMTcwNSA3LjQyNjE0IDguMjMwOTggNy4zOTA0OSA4LjMyNjg5IDcuMzIzOTZMMTQuODc1MyAyLjc5MjE5VjhIMTYuMDIxMlYyLjI3MDgzQzE2LjAyMTIgMS45NjY5NCAxNS45MDA0IDEuNjc1NDkgMTUuNjg1NiAxLjQ2MDYxQzE1LjQ3MDcgMS4yNDU3MiAxNS4xNzkyIDEuMTI1IDE0Ljg3NTMgMS4xMjVIMS4xMjUzM0MwLjgyMTQzMiAxLjEyNSAwLjUyOTk4NCAxLjI0NTcyIDAuMzE1MDk5IDEuNDYwNjFDMC4xMDAyMTQgMS42NzU0OSAtMC4wMjA1MDc4IDEuOTY2OTQgLTAuMDIwNTA3OCAyLjI3MDgzVjExLjQzNzVDLTAuMDIwNTA3OCAxMS43NDE0IDAuMTAwMjE0IDEyLjAzMjggMC4zMTUwOTkgMTIuMjQ3N0MwLjUyOTk4NCAxMi40NjI2IDAuODIxNDMyIDEyLjU4MzMgMS4xMjUzMyAxMi41ODMzSDMuOTcyVjExLjQzNzVaTTEzLjYxNDkgMi4yNzA4M0w4LjAwMDMyIDYuMTU1MjFMMi4zODU3NCAyLjI3MDgzSDEzLjYxNDlaIiBmaWxsPSIjRkM1RDBEIi8+CjxwYXRoIGQ9Ik00LjI4MjEgOS45NTM2NUw2LjMzMzE0IDEyLjAxMDRMNC4yNzYzNyAxNC4wNjcyTDUuMDg5OTEgMTQuODc1TDcuOTU0NDkgMTIuMDEwNEw1LjA4OTkxIDkuMTQ1ODNMNC4yODIxIDkuOTUzNjVaIiBmaWxsPSJibGFjayIvPgo8L2c+CjxkZWZzPgo8Y2xpcFBhdGggaWQ9ImNsaXAwXzkwXzI0MjAiPgo8cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+Cg==">
+      <extensionElements>
+        <zeebe:taskDefinition type="io.camunda:email:1" retries="3" />
+        <zeebe:ioMapping>
+          <zeebe:input source="simple" target="authentication.type" />
+          <zeebe:input source="edi282000@gmail.com" target="authentication.username" />
+          <zeebe:input source="dqhkvdwtmyqxcgik" target="authentication.password" />
+          <zeebe:input source="smtp" target="protocol" />
+          <zeebe:input source="smtp.gmail.com" target="data.smtpConfig.smtpHost" />
+          <zeebe:input source="587" target="data.smtpConfig.smtpPort" />
+          <zeebe:input source="TLS" target="data.smtpConfig.smtpCryptographicProtocol" />
+          <zeebe:input source="sendEmailSmtp" target="data.smtpActionDiscriminator" />
+          <zeebe:input source="edi282000@gmail.com" target="data.smtpAction.from" />
+          <zeebe:input source="=correo" target="data.smtpAction.to" />
+          <zeebe:input source="Notificación Rechazo" target="data.smtpAction.subject" />
+          <zeebe:input source="HTML" target="data.smtpAction.contentType" />
+          <zeebe:input target="data.smtpAction.htmlBody" source="&quot;&lt;h1&gt;Notificación del Sistema&lt;/h1&gt;&lt;p&gt;Este es un mensaje automático del sistema de reembolsos.&lt;/p&gt;&quot;" />
+        </zeebe:ioMapping>
+        <zeebe:taskHeaders>
+          <zeebe:header key="elementTemplateVersion" value="3" />
+          <zeebe:header key="elementTemplateId" value="io.camunda.connectors.email.v1" />
+          <zeebe:header key="retryBackoff" value="PT0S" />
+        </zeebe:taskHeaders>
+      </extensionElements>
+      <incoming>Flow_02h44a7</incoming>
+      <outgoing>Flow_1kpq70v</outgoing>
+    </serviceTask>
+    <endEvent id="Event_1n6r35u" name="Proceso terminado con error">
+      <incoming>Flow_1hps6ku</incoming>
+    </endEvent>
+    <endEvent id="Event_02ubrpb" name="Rechazo&#10;(Fin del Proceso)">
+      <incoming>Flow_1kpq70v</incoming>
+    </endEvent>
+    <serviceTask id="Activity_052r1ge" name="Recibir solicitud desde FastAPI">
+      <extensionElements>
+        <zeebe:taskDefinition type="reembolso.inicio" retries="3" />
+      </extensionElements>
+      <incoming>Flow_0rcrkol</incoming>
+      <outgoing>Flow_0y8zreg</outgoing>
+    </serviceTask>
+    <serviceTask id="Activity_1a29oxg" name="Registrar solicitud en ERP / sistema contable" zeebe:modelerTemplate="io.camunda.connectors.UIPath.v1" zeebe:modelerTemplateVersion="5" zeebe:modelerTemplateIcon="data:image/svg+xml;utf8,%3C%3Fxml version='1.0' encoding='utf-8'%3F%3E%3Csvg version='1.1' width='18' height='18' id='Extra_Large' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 3261 1200' style='enable-background:new 0 0 3261 1200;' xml:space='preserve'%3E%3Cstyle type='text/css'%3E .st0%7Bfill:%23FA4616;%7D%0A%3C/style%3E%3Cg%3E%3Cpath class='st0' d='M0,0h1200v1200H0V0z M124.2,1075.8h951.6V124.2H124.2V1075.8z M604,309.5h124.2v363.6 c0,164.3-93.2,263.4-250.4,263.4c-154.3,0-245.4-97.2-245.4-263.4V309.5h124.2v363.6c0,91.2,38.1,146.2,124.2,146.2 c83.1,0,123.2-52.1,123.2-146.2V309.5z M964.6,309.5c0,44.1-32.1,74.1-76.1,74.1c-44.1,0-76.1-30-76.1-74.1 c0-45.1,32.1-76.1,76.1-76.1C932.5,233.4,964.6,264.4,964.6,309.5z M826.4,442.7h124.2v487.8H826.4V442.7z M1784,517.9 c0,133.2-88.1,212.4-223.4,212.4h-112.2v200.3h-124.2v-621h236.4C1697.8,309.5,1784,389.6,1784,517.9z M1657.8,517.9 c0-68.1-39.1-108.2-110.2-108.2h-99.2v221.4h99.2C1618.7,631.1,1657.8,591,1657.8,517.9z M2201.7,442.7h124.2v487.8h-124.2v-55.1 c-33.1,39.1-85.1,61.1-158.3,61.1c-132.2,0-225.4-104.2-225.4-249.4c0-144.2,91.2-250.4,225.4-250.4c71.1,0,125.2,25,158.3,67.1 V442.7z M2201.7,687.1c0-84.1-50.1-142.2-129.2-142.2c-79.1,0-128.2,55.1-128.2,142.2c0,81.1,44.1,140.2,128.2,140.2 C2148.6,827.4,2201.7,772.3,2201.7,687.1z M2629.4,824.4h49.1v106.2h-65.1c-118.2,0-169.3-56.1-169.3-171.3V547.9H2386V442.7h58.1 V309.5h124.2v133.2h109.2v105.2h-109.2v212.3C2568.3,803.3,2581.3,824.4,2629.4,824.4z M3214.3,647.1v283.5h-124.2V661.1 c0-74.1-38.1-122.2-111.2-122.2s-117.2,50.1-117.2,133.2v258.4h-124.2V279.5h124.2v213.4c31.1-37.1,80.1-57.1,147.2-57.1 C3124.2,435.7,3214.3,518.9,3214.3,647.1z M3200,279.5h21.7v4.2h-8.5v25.8h-4.8v-25.8h-8.5V279.5z M3261,279.5v30h-4.8v-22.8 l-9.7,22.8h-3.6l-9.7-22.8v22.8h-4.8v-30h6l10.3,23.4l10.3-23.4H3261z'/%3E%3C/g%3E%3C/svg%3E%0A">
+      <extensionElements>
+        <zeebe:taskDefinition type="io.camunda:http-json:1" />
+        <zeebe:ioMapping>
+          <zeebe:input source="addQueueItem" target="operationType" />
+          <zeebe:input source="oauth-client-credentials-flow" target="authentication.type" />
+          <zeebe:input source="https://cloud.uipath.com/identity_/connect/token" target="authentication.oauthTokenEndpoint" />
+          <zeebe:input source="519761b7-06fc-4955-a17f-069fe97222ef" target="authentication.clientId" />
+          <zeebe:input source="HtFE8MN_bygFMLFUBySc8*vF?QF1((5rK^%7OO4$LbALn3BFH7pVu6ATxZIOd0NY" target="authentication.clientSecret" />
+          <zeebe:input source="OR.Queues.Write OR.Default" target="authentication.scopes" />
+          <zeebe:input source="basicAuthHeader" target="authentication.clientAuthentication" />
+          <zeebe:input source="post" target="method" />
+          <zeebe:input source="https://cloud.uipath.com" target="cloudUrl" />
+          <zeebe:input source="bbfjebbryz" target="cloudOrg" />
+          <zeebe:input source="DefaultTenant" target="cloudTenant" />
+          <zeebe:input source="6986511" target="organizationUnitId" />
+          <zeebe:input source="={&quot;X-UIPATH-OrganizationUnitId&quot;:organizationUnitId, &quot;Content-Type&quot;:&quot;application/json&quot;}" target="headers" />
+          <zeebe:input source="RegistrarFormularioRPA" target="queueName" />
+          <zeebe:input source="Normal" target="priority" />
+          <zeebe:input source="={&#10;      &quot;nombre&quot;: nombre,&#10;      &quot;cedula&quot;: cedula,&#10;      &quot;departamento&quot;: departamento,&#10;      &quot;correo&quot;: correo,&#10;      &quot;telefono&quot;: telefono,&#10;      &quot;fechaGasto&quot;: fechaGasto,&#10;      &quot;tipoGasto&quot;: tipoGasto,&#10;      &quot;numeroFactura&quot;: numeroFactura,&#10;      &quot;monto&quot;: monto,&#10;      &quot;medioPago&quot;: medioPago,&#10;      &quot;descripcion&quot;: descripcion,&#10;      &quot;archivo&quot;: archivo&#10;    }" target="specificContent" />
+          <zeebe:input source="={&quot;itemData&quot;:{&quot;DeferDate&quot;:if deferDate = null then null else deferDate, &quot;DueDate&quot;:if dueDate = null then null else dueDate,&quot;Priority&quot;:if priority = null then null else priority,&quot;Name&quot;:queueName,&quot;SpecificContent&quot;:if specificContent = null then null else specificContent,&quot;Reference&quot;:if reference = null then null else reference}}" target="body" />
+          <zeebe:input source="20" target="connectionTimeoutInSeconds" />
+          <zeebe:input source="=&quot;https:&quot;+&quot;//&quot;+cloudUrl+&quot;/&quot;+cloudOrg+&quot;/&quot;+cloudTenant+&quot;/orchestrator_/odata/Queues/UiPathODataSvc.AddQueueItem&quot;" target="url" />
+        </zeebe:ioMapping>
+        <zeebe:taskHeaders>
+          <zeebe:header key="resultExpression" value="={itemStatus: response.body.value[1].Status}" />
+          <zeebe:header key="elementTemplateVersion" value="5" />
+          <zeebe:header key="elementTemplateId" value="io.camunda.connectors.UIPath.v1" />
+        </zeebe:taskHeaders>
+      </extensionElements>
+      <incoming>Flow_17xxb49</incoming>
+      <outgoing>Flow_0qqhrt2</outgoing>
+    </serviceTask>
+    <scriptTask id="Activity_1fchbt3" name="Revisión de datos">
+      <extensionElements>
+        <zeebe:script expression="={&#10;      nombre: nombre,&#10;      cedula: cedula,&#10;      departamento: departamento,&#10;      correo: correo,&#10;      telefono: telefono,&#10;      fechaGasto: fechaGasto,&#10;      tipoGasto: tipoGasto,&#10;      numeroFactura: numeroFactura,&#10;      monto: monto,&#10;      medioPago: medioPago,&#10;      descripcion: descripcion,&#10;      archivo: archivoNombre&#10;    }" resultVariable="revisionDatos" />
+      </extensionElements>
+      <incoming>Flow_0y8zreg</incoming>
+      <outgoing>Flow_0060mla</outgoing>
+    </scriptTask>
+    <sequenceFlow id="Flow_0rcrkol" name="Server 8000" sourceRef="StartEvent_1" targetRef="Activity_052r1ge" />
+    <sequenceFlow id="Flow_1rgnrdp" name="Sí &#10;Server 9009" sourceRef="Gateway_00dpjhf" targetRef="Activity_0h9fydg">
+      <conditionExpression xsi:type="bpmn:tFormalExpression">=validateData = true</conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="Gateway_02gm3vi" name="Solicitud Asignada">
+      <incoming>Flow_0l9uexv</incoming>
+      <outgoing>Flow_0h6cukx</outgoing>
+      <outgoing>Flow_0cthr9h</outgoing>
+    </exclusiveGateway>
+    <subProcess id="Activity_0ct3zd7" name="Validación de Datos">
+      <incoming>Flow_0060mla</incoming>
+      <outgoing>Flow_0mm6ve0</outgoing>
+      <outgoing>Flow_1oe8l6b</outgoing>
+      <serviceTask id="Activity_161jqmk" name="Comparación y duplicidad">
+        <extensionElements>
+          <zeebe:ioMapping>
+            <zeebe:input source="=responseDoc.body.nombre" target="nombreDoc" />
+            <zeebe:input source="=responseDoc.body.cedula_ruc" target="cedulaDoc" />
+            <zeebe:input source="=responseDoc.body.fecha" target="fechaDoc" />
+            <zeebe:input source="=responseDoc.body.correo" target="correoDoc" />
+            <zeebe:input source="=responseDoc.body.direccion" target="direccionDoc" />
+            <zeebe:input source="=responseDoc.body.telefono" target="telefonoDoc" />
+            <zeebe:input source="=responseDoc.body.numero_factura" target="facturaNDoc" />
+            <zeebe:input source="=responseDoc.body.monto_total" target="montoDoc" />
+            <zeebe:input source="=nombre" target="nombre" />
+            <zeebe:input source="=cedula" target="cedula" />
+            <zeebe:input source="=fechaGasto" target="fechaGasto" />
+            <zeebe:input source="=correo" target="correo" />
+            <zeebe:input source="=direccion" target="direccion" />
+            <zeebe:input source="=telefono" target="telefono" />
+            <zeebe:input source="=numeroFactura" target="numeroFactura" />
+            <zeebe:input source="=monto" target="monto" />
+            <zeebe:output source="=docvalidate" target="docvalidate" />
+          </zeebe:ioMapping>
+          <zeebe:taskDefinition type="comparacion-duplicidad" retries="1" />
+        </extensionElements>
+        <incoming>Flow_0wcdu4j</incoming>
+        <outgoing>Flow_01g0va5</outgoing>
+      </serviceTask>
+      <endEvent id="Event_0jl4ype">
+        <incoming>Flow_1d49ia1</incoming>
+      </endEvent>
+      <startEvent id="Event_1kzfbzv">
+        <outgoing>Flow_17lok0k</outgoing>
+      </startEvent>
+      <intermediateThrowEvent id="Event_1nnv6x1">
+        <extensionElements>
+          <zeebe:taskDefinition type="reembolso.notificacion2" retries="1" />
+          <zeebe:ioMapping>
+            <zeebe:input source="=notifica2" target="notifica2" />
+          </zeebe:ioMapping>
+        </extensionElements>
+        <incoming>Flow_1bh8uvr</incoming>
+        <messageEventDefinition id="MessageEventDefinition_10s1v94" />
+      </intermediateThrowEvent>
+      <sequenceFlow id="Flow_01g0va5" sourceRef="Activity_161jqmk" targetRef="Activity_0u3zejb" />
+      <sequenceFlow id="Flow_0wcdu4j" sourceRef="Activity_0hbwq1h" targetRef="Activity_161jqmk" />
+      <sequenceFlow id="Flow_1bh8uvr" sourceRef="Activity_0u3zejb" targetRef="Event_1nnv6x1" />
+      <sequenceFlow id="Flow_1d49ia1" sourceRef="Activity_0u3zejb" targetRef="Event_0jl4ype" />
+      <sequenceFlow id="Flow_1q5ey98" sourceRef="Activity_0tt0kxi" targetRef="Activity_0hbwq1h" />
+      <sequenceFlow id="Flow_17lok0k" name="Server 9000" sourceRef="Event_1kzfbzv" targetRef="Activity_0tt0kxi" />
+      <serviceTask id="Activity_0hbwq1h" name="Validación de Documentos" zeebe:modelerTemplate="io.camunda.connectors.HttpJson.v2" zeebe:modelerTemplateVersion="11" zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAxOCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE3LjAzMzUgOC45OTk5N0MxNy4wMzM1IDEzLjQ0NzUgMTMuNDI4MSAxNy4wNTI5IDguOTgwNjUgMTcuMDUyOUM0LjUzMzE2IDE3LjA1MjkgMC45Mjc3NjUgMTMuNDQ3NSAwLjkyNzc2NSA4Ljk5OTk3QzAuOTI3NzY1IDQuNTUyNDggNC41MzMxNiAwLjk0NzA4MyA4Ljk4MDY1IDAuOTQ3MDgzQzEzLjQyODEgMC45NDcwODMgMTcuMDMzNSA0LjU1MjQ4IDE3LjAzMzUgOC45OTk5N1oiIGZpbGw9IiM1MDU1NjIiLz4KPHBhdGggZD0iTTQuOTMxMjYgMTQuMTU3MUw2Ljc4MTA2IDMuNzE0NzFIMTAuMTM3NUMxMS4xOTE3IDMuNzE0NzEgMTEuOTgyNCAzLjk4MzIzIDEyLjUwOTUgNC41MjAyN0MxMy4wNDY1IDUuMDQ3MzYgMTMuMzE1IDUuNzMzNTggMTMuMzE1IDYuNTc4OTJDMTMuMzE1IDcuNDQ0MTQgMTMuMDcxNCA4LjE1NTIyIDEyLjU4NDEgOC43MTIxNUMxMi4xMDY3IDkuMjU5MTMgMTEuNDU1MyA5LjYzNzA1IDEwLjYyOTggOS44NDU5TDEyLjA2MTkgMTQuMTU3MUgxMC4zMzE1TDkuMDMzNjQgMTAuMDI0OUg3LjI0MzUxTDYuNTEyNTQgMTQuMTU3MUg0LjkzMTI2Wk03LjQ5NzExIDguNTkyODFIOS4yNDI0OEM5Ljk5ODMyIDguNTkyODEgMTAuNTkwMSA4LjQyMzc0IDExLjAxNzcgOC4wODU2MUMxMS40NTUzIDcuNzM3NTMgMTEuNjc0MSA3LjI2NTEzIDExLjY3NDEgNi42Njg0MkMxMS42NzQxIDYuMTkxMDYgMTEuNTI0OSA1LjgxODExIDExLjIyNjUgNS41NDk1OUMxMC45MjgyIDUuMjcxMTMgMTAuNDU1OCA1LjEzMTkgOS44MDkzNiA1LjEzMTlIOC4xMDg3NEw3LjQ5NzExIDguNTkyODFaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K">
+        <extensionElements>
+          <zeebe:taskDefinition type="io.camunda:http-json:1" retries="3" />
+          <zeebe:ioMapping>
+            <zeebe:input source="noAuth" target="authentication.type" />
+            <zeebe:input source="GET" target="method" />
+            <zeebe:input source="http://host.docker.internal:9008/ocr-desde-nombre/" target="url" />
+            <zeebe:input source="={ &quot;Content-Type&quot;: &quot;application/json&quot; }" target="headers" />
+            <zeebe:input source="={ nombreArchivo: archivoNombre }" target="queryParameters" />
+            <zeebe:input source="=true" target="storeResponse" />
+            <zeebe:input source="=20" target="connectionTimeoutInSeconds" />
+            <zeebe:input source="=20" target="readTimeoutInSeconds" />
+            <zeebe:input source="=false" target="ignoreNullValues" />
+          </zeebe:ioMapping>
+          <zeebe:taskHeaders>
+            <zeebe:header key="elementTemplateVersion" value="11" />
+            <zeebe:header key="elementTemplateId" value="io.camunda.connectors.HttpJson.v2" />
+            <zeebe:header key="resultVariable" value="responseDoc" />
+            <zeebe:header key="retryBackoff" value="PT0S" />
+          </zeebe:taskHeaders>
+        </extensionElements>
+        <incoming>Flow_1q5ey98</incoming>
+        <outgoing>Flow_0wcdu4j</outgoing>
+      </serviceTask>
+      <scriptTask id="Activity_0u3zejb" name="Validar Datos">
+        <extensionElements>
+          <zeebe:script expression="=if empleadoEncontrado = true and docvalidate = true then true else false" resultVariable="validateData" />
+          <zeebe:ioMapping>
+            <zeebe:output source="=validateData" target="validateData" />
+            <zeebe:output source="=&quot;ID-&quot; + uuid()" target="notifica2" />
+          </zeebe:ioMapping>
+        </extensionElements>
+        <incoming>Flow_01g0va5</incoming>
+        <outgoing>Flow_1d49ia1</outgoing>
+        <outgoing>Flow_1bh8uvr</outgoing>
+      </scriptTask>
+      <serviceTask id="Activity_0tt0kxi" name="Validar datos del Empleado" zeebe:modelerTemplate="io.camunda.connectors.HttpJson.v2" zeebe:modelerTemplateVersion="11" zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAxOCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE3LjAzMzUgOC45OTk5N0MxNy4wMzM1IDEzLjQ0NzUgMTMuNDI4MSAxNy4wNTI5IDguOTgwNjUgMTcuMDUyOUM0LjUzMzE2IDE3LjA1MjkgMC45Mjc3NjUgMTMuNDQ3NSAwLjkyNzc2NSA4Ljk5OTk3QzAuOTI3NzY1IDQuNTUyNDggNC41MzMxNiAwLjk0NzA4MyA4Ljk4MDY1IDAuOTQ3MDgzQzEzLjQyODEgMC45NDcwODMgMTcuMDMzNSA0LjU1MjQ4IDE3LjAzMzUgOC45OTk5N1oiIGZpbGw9IiM1MDU1NjIiLz4KPHBhdGggZD0iTTQuOTMxMjYgMTQuMTU3MUw2Ljc4MTA2IDMuNzE0NzFIMTAuMTM3NUMxMS4xOTE3IDMuNzE0NzEgMTEuOTgyNCAzLjk4MzIzIDEyLjUwOTUgNC41MjAyN0MxMy4wNDY1IDUuMDQ3MzYgMTMuMzE1IDUuNzMzNTggMTMuMzE1IDYuNTc4OTJDMTMuMzE1IDcuNDQ0MTQgMTMuMDcxNCA4LjE1NTIyIDEyLjU4NDEgOC43MTIxNUMxMi4xMDY3IDkuMjU5MTMgMTEuNDU1MyA5LjYzNzA1IDEwLjYyOTggOS44NDU5TDEyLjA2MTkgMTQuMTU3MUgxMC4zMzE1TDkuMDMzNjQgMTAuMDI0OUg3LjI0MzUxTDYuNTEyNTQgMTQuMTU3MUg0LjkzMTI2Wk03LjQ5NzExIDguNTkyODFIOS4yNDI0OEM5Ljk5ODMyIDguNTkyODEgMTAuNTkwMSA4LjQyMzc0IDExLjAxNzcgOC4wODU2MUMxMS40NTUzIDcuNzM3NTMgMTEuNjc0MSA3LjI2NTEzIDExLjY3NDEgNi42Njg0MkMxMS42NzQxIDYuMTkxMDYgMTEuNTI0OSA1LjgxODExIDExLjIyNjUgNS41NDk1OUMxMC45MjgyIDUuMjcxMTMgMTAuNDU1OCA1LjEzMTkgOS44MDkzNiA1LjEzMTlIOC4xMDg3NEw3LjQ5NzExIDguNTkyODFaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K">
+        <extensionElements>
+          <zeebe:taskDefinition type="io.camunda:http-json:1" retries="3" />
+          <zeebe:ioMapping>
+            <zeebe:input source="noAuth" target="authentication.type" />
+            <zeebe:input source="POST" target="method" />
+            <zeebe:input source="http://host.docker.internal:9000/validar-empleado" target="url" />
+            <zeebe:input source="={ &quot;Content-Type&quot;: &quot;application/json&quot; }" target="headers" />
+            <zeebe:input source="=true" target="storeResponse" />
+            <zeebe:input source="=20" target="connectionTimeoutInSeconds" />
+            <zeebe:input source="=20" target="readTimeoutInSeconds" />
+            <zeebe:input source="={ nombre: nombre, cedula: cedula }" target="body" />
+            <zeebe:input source="=true" target="ignoreNullValues" />
+          </zeebe:ioMapping>
+          <zeebe:taskHeaders>
+            <zeebe:header key="elementTemplateVersion" value="11" />
+            <zeebe:header key="elementTemplateId" value="io.camunda.connectors.HttpJson.v2" />
+            <zeebe:header key="resultExpression" value="={&#10;  empleadoEncontrado: response.body.empleadoEncontrado,&#10;  docvalidate : true&#10;}" />
+            <zeebe:header key="errorExpression" value="=if error.code = &quot;408&quot; then&#10;  bpmnError(&quot;EmpleadoError&quot;, &quot;Timeout: conexión abortada&quot;, error)&#10;else if error.code = &quot;500&quot; then&#10;  bpmnError(&quot;EmpleadoError&quot;, &quot;Error interno del servidor&quot;, error)&#10;else&#10;  null" />
+            <zeebe:header key="retryBackoff" value="PT0S" />
+          </zeebe:taskHeaders>
+        </extensionElements>
+        <incoming>Flow_17lok0k</incoming>
+        <outgoing>Flow_1q5ey98</outgoing>
+      </serviceTask>
+    </subProcess>
+    <serviceTask id="Activity_0h9fydg" name="Verificar políticas contable" zeebe:modelerTemplate="io.camunda.connectors.HttpJson.v2" zeebe:modelerTemplateVersion="11" zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAxOCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE3LjAzMzUgOC45OTk5N0MxNy4wMzM1IDEzLjQ0NzUgMTMuNDI4MSAxNy4wNTI5IDguOTgwNjUgMTcuMDUyOUM0LjUzMzE2IDE3LjA1MjkgMC45Mjc3NjUgMTMuNDQ3NSAwLjkyNzc2NSA4Ljk5OTk3QzAuOTI3NzY1IDQuNTUyNDggNC41MzMxNiAwLjk0NzA4MyA4Ljk4MDY1IDAuOTQ3MDgzQzEzLjQyODEgMC45NDcwODMgMTcuMDMzNSA0LjU1MjQ4IDE3LjAzMzUgOC45OTk5N1oiIGZpbGw9IiM1MDU1NjIiLz4KPHBhdGggZD0iTTQuOTMxMjYgMTQuMTU3MUw2Ljc4MTA2IDMuNzE0NzFIMTAuMTM3NUMxMS4xOTE3IDMuNzE0NzEgMTEuOTgyNCAzLjk4MzIzIDEyLjUwOTUgNC41MjAyN0MxMy4wNDY1IDUuMDQ3MzYgMTMuMzE1IDUuNzMzNTggMTMuMzE1IDYuNTc4OTJDMTMuMzE1IDcuNDQ0MTQgMTMuMDcxNCA4LjE1NTIyIDEyLjU4NDEgOC43MTIxNUMxMi4xMDY3IDkuMjU5MTMgMTEuNDU1MyA5LjYzNzA1IDEwLjYyOTggOS44NDU5TDEyLjA2MTkgMTQuMTU3MUgxMC4zMzE1TDkuMDMzNjQgMTAuMDI0OUg3LjI0MzUxTDYuNTEyNTQgMTQuMTU3MUg0LjkzMTI2Wk03LjQ5NzExIDguNTkyODFIOS4yNDI0OEM5Ljk5ODMyIDguNTkyODEgMTAuNTkwMSA4LjQyMzc0IDExLjAxNzcgOC4wODU2MUMxMS40NTUzIDcuNzM3NTMgMTEuNjc0MSA3LjI2NTEzIDExLjY3NDEgNi42Njg0MkMxMS42NzQxIDYuMTkxMDYgMTEuNTI0OSA1LjgxODExIDExLjIyNjUgNS41NDk1OUMxMC45MjgyIDUuMjcxMTMgMTAuNDU1OCA1LjEzMTkgOS44MDkzNiA1LjEzMTlIOC4xMDg3NEw3LjQ5NzExIDguNTkyODFaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K">
+      <extensionElements>
+        <zeebe:taskDefinition type="io.camunda:http-json:1" retries="3" />
+        <zeebe:ioMapping>
+          <zeebe:input source="noAuth" target="authentication.type" />
+          <zeebe:input source="POST" target="method" />
+          <zeebe:input source="http://host.docker.internal:9009/verificar-politicas" target="url" />
+          <zeebe:input source="={ &quot;Content-Type&quot;: &quot;application/json&quot; }" target="headers" />
+          <zeebe:input source="=true" target="storeResponse" />
+          <zeebe:input source="=20" target="connectionTimeoutInSeconds" />
+          <zeebe:input source="=20" target="readTimeoutInSeconds" />
+          <zeebe:input source="={&#10;      nombre: nombre,&#10;      monto: monto,&#10;      tipoGasto: tipoGasto,&#10;      medioPago: medioPago,&#10;      fechaGasto: fechaGasto,&#10;      empleadoEncontrado: empleadoEncontrado,&#10;      docvalidate: docvalidate,&#10;      descripcion: descripcion&#10;    }" target="body" />
+          <zeebe:input source="=true" target="ignoreNullValues" />
+          <zeebe:output source="=responseV.body.cumplePoliticas" target="cumplePoliticas" />
+          <zeebe:output source="=responseV.body.observaciones" target="observaciones" />
+          <zeebe:output source="=responseV.body.recomendaciones" target="recomendaciones" />
+          <zeebe:output source="=responseV.body.respuestaNatural" target="respuestaNaturalV" />
+        </zeebe:ioMapping>
+        <zeebe:taskHeaders>
+          <zeebe:header key="elementTemplateVersion" value="11" />
+          <zeebe:header key="elementTemplateId" value="io.camunda.connectors.HttpJson.v2" />
+          <zeebe:header key="resultVariable" value="responseV" />
+          <zeebe:header key="errorExpression" value="=if error.code = &quot;408&quot; then&#10;  bpmnError(&quot;EmpleadoError&quot;, &quot;Timeout: conexión abortada&quot;, error)&#10;else if error.code = &quot;500&quot; then&#10;  bpmnError(&quot;EmpleadoError&quot;, &quot;Error interno del servidor&quot;, error)&#10;else&#10;  null" />
+          <zeebe:header key="retryBackoff" value="PT0S" />
+        </zeebe:taskHeaders>
+      </extensionElements>
+      <incoming>Flow_1rgnrdp</incoming>
+      <outgoing>Flow_1k4x31c</outgoing>
+    </serviceTask>
+  </process>
+  <message id="Message_3dehuti" name="ErrorSistemaValidacion">
+    <extensionElements>
+      <zeebe:subscription correlationKey="=errorSistemaValidacion" />
+    </extensionElements>
+  </message>
+  <message id="Message_11hpmsl" name="NotificacionTerceraEtapa">
+    <extensionElements>
+      <zeebe:subscription correlationKey="=notifica3" />
+    </extensionElements>
+  </message>
+  <message id="Message_2bs5a96" name="NotificacionInicial">
+    <extensionElements>
+      <zeebe:subscription correlationKey="=inicialN_ID" />
+    </extensionElements>
+  </message>
+  <message id="Message_22cn3hj" name="NotificacionSegundaEtapa">
+    <extensionElements>
+      <zeebe:subscription correlationKey="=notifica2" />
+    </extensionElements>
+  </message>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_0t95nlo">
+      <bpmndi:BPMNShape id="Participant_108ww2y_di" bpmnElement="Participant_108ww2y" isHorizontal="true">
+        <dc:Bounds x="130" y="80" width="2360" height="1750" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_0egi1hr_di" bpmnElement="Lane_0egi1hr" isHorizontal="true">
+        <dc:Bounds x="160" y="1610" width="2330" height="220" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_01w152g_di" bpmnElement="Lane_01w152g" isHorizontal="true">
+        <dc:Bounds x="160" y="1400" width="2330" height="210" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_1yco6cd_di" bpmnElement="Lane_1yco6cd" isHorizontal="true">
+        <dc:Bounds x="160" y="1110" width="2330" height="290" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_09xsxyu_di" bpmnElement="Lane_09xsxyu" isHorizontal="true">
+        <dc:Bounds x="160" y="750" width="2330" height="360" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_1mvfk6l_di" bpmnElement="Lane_1mvfk6l" isHorizontal="true">
+        <dc:Bounds x="160" y="290" width="2330" height="460" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_0xc4syw_di" bpmnElement="Lane_0xc4syw" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="2330" height="210" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_00dpjhf_di" bpmnElement="Gateway_00dpjhf" isMarkerVisible="true">
+        <dc:Bounds x="905" y="495" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="888" y="457.5" width="84" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0zj4d7p_di" bpmnElement="Gateway_0zj4d7p" isMarkerVisible="true">
+        <dc:Bounds x="1825" y="1245" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1871" y="1290" width="58" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0koim1v_di" bpmnElement="Activity_0gxr7kb">
+        <dc:Bounds x="1600" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1bdeckj_di" bpmnElement="Activity_05nmisw">
+        <dc:Bounds x="1520" y="1230" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_05wmh64_di" bpmnElement="Activity_05wmh64">
+        <dc:Bounds x="2010" y="1470" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1yggdek_di" bpmnElement="Activity_0evcnyk">
+        <dc:Bounds x="1170" y="490" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_06plrhe_di" bpmnElement="Event_03jotg0">
+        <dc:Bounds x="412" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0q0m07b" bpmnElement="Event_0nii1sx">
+        <dc:Bounds x="1342" y="192" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="834" y="328" width="31" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_00tnx9s_di" bpmnElement="Event_1aq2it7">
+        <dc:Bounds x="1502" y="1152" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0kkwnsu_di" bpmnElement="Event_1kkjh2m">
+        <dc:Bounds x="512" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_05h65ep_di" bpmnElement="Event_1vy5341">
+        <dc:Bounds x="862" y="192" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="834" y="328" width="31" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_12yaxkf_di" bpmnElement="Event_1yur5tq">
+        <dc:Bounds x="1632" y="472" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0ibm1ec_di" bpmnElement="Event_0ibm1ec">
+        <dc:Bounds x="2282" y="522" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2292" y="565" width="16" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="306" y="192" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="283" y="142" width="81" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1fcgcgq_di" bpmnElement="Activity_1uvyvsb">
+        <dc:Bounds x="1060" y="1680" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_008syb7_di" bpmnElement="Activity_0fe9obs">
+        <dc:Bounds x="700" y="480" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0g72f22" bpmnElement="Activity_1caeq6p">
+        <dc:Bounds x="600" y="170" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0i2p509" bpmnElement="Activity_1kbfccu">
+        <dc:Bounds x="1010" y="170" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_08gnvop" bpmnElement="Activity_1tkcx1y">
+        <dc:Bounds x="1490" y="170" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_11egcjz" bpmnElement="Activity_0686kpa">
+        <dc:Bounds x="1620" y="590" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0exhlaw" bpmnElement="Activity_1367sg1">
+        <dc:Bounds x="2140" y="500" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_09f2x4i" bpmnElement="Activity_1ijtxk7">
+        <dc:Bounds x="1890" y="490" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1n6r35u_di" bpmnElement="Event_1n6r35u">
+        <dc:Bounds x="732" y="392" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="635" y="390" width="70" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_10fxdu1_di" bpmnElement="Event_02ubrpb">
+        <dc:Bounds x="2042" y="512" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2018" y="482" width="85" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1idxkzd_di" bpmnElement="Activity_052r1ge">
+        <dc:Bounds x="274" y="500" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0e605q1_di" bpmnElement="Activity_1a29oxg">
+        <dc:Bounds x="2010" y="1680" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0hekz6v_di" bpmnElement="Activity_1fchbt3">
+        <dc:Bounds x="440" y="500" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_02gm3vi_di" bpmnElement="Gateway_02gm3vi" isMarkerVisible="true">
+        <dc:Bounds x="1395" y="505" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1457" y="520" width="46" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ct3zd7_di" bpmnElement="Activity_0ct3zd7" isExpanded="true">
+        <dc:Bounds x="200" y="820" width="830" height="240" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0efyz8w_di" bpmnElement="Activity_161jqmk">
+        <dc:Bounds x="660" y="940" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0jl4ype_di" bpmnElement="Event_0jl4ype">
+        <dc:Bounds x="952" y="962" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1kzfbzv_di" bpmnElement="Event_1kzfbzv">
+        <dc:Bounds x="242" y="862" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0t1t9rs_di" bpmnElement="Event_1nnv6x1">
+        <dc:Bounds x="842" y="852" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_12rlrzf_di" bpmnElement="Activity_0hbwq1h">
+        <dc:Bounds x="520" y="940" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_04cx5wy" bpmnElement="Activity_0u3zejb">
+        <dc:Bounds x="810" y="940" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1dvqdt3" bpmnElement="Activity_0tt0kxi">
+        <dc:Bounds x="380" y="940" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_01g0va5_di" bpmnElement="Flow_01g0va5">
+        <di:waypoint x="760" y="980" />
+        <di:waypoint x="810" y="980" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0wcdu4j_di" bpmnElement="Flow_0wcdu4j">
+        <di:waypoint x="620" y="980" />
+        <di:waypoint x="660" y="980" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1bh8uvr_di" bpmnElement="Flow_1bh8uvr">
+        <di:waypoint x="860" y="940" />
+        <di:waypoint x="860" y="888" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1d49ia1_di" bpmnElement="Flow_1d49ia1">
+        <di:waypoint x="910" y="980" />
+        <di:waypoint x="952" y="980" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1q5ey98_di" bpmnElement="Flow_1q5ey98">
+        <di:waypoint x="480" y="980" />
+        <di:waypoint x="520" y="980" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_17lok0k_di" bpmnElement="Flow_17lok0k">
+        <di:waypoint x="260" y="898" />
+        <di:waypoint x="260" y="980" />
+        <di:waypoint x="380" y="980" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="280" y="948" width="60" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_1v8sz9m_di" bpmnElement="Activity_0h9fydg">
+        <dc:Bounds x="1060" y="900" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0okpusl" bpmnElement="Event_1f2212e">
+        <dc:Bounds x="1142" y="882" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1dt6r4y" bpmnElement="Event_1dagmza">
+        <dc:Bounds x="742" y="802" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0xca05c_di" bpmnElement="Event_15lr633">
+        <dc:Bounds x="1602" y="1212" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0060mla_di" bpmnElement="Flow_0060mla">
+        <di:waypoint x="490" y="580" />
+        <di:waypoint x="490" y="820" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02h44a7_di" bpmnElement="Flow_02h44a7">
+        <di:waypoint x="1875" y="1270" />
+        <di:waypoint x="1940" y="1270" />
+        <di:waypoint x="1940" y="570" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_041rgw4_di" bpmnElement="Flow_041rgw4">
+        <di:waypoint x="1550" y="1230" />
+        <di:waypoint x="1550" y="1209" />
+        <di:waypoint x="1520" y="1209" />
+        <di:waypoint x="1520" y="1188" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_057soq7_di" bpmnElement="Flow_057soq7">
+        <di:waypoint x="2110" y="1510" />
+        <di:waypoint x="2190" y="1510" />
+        <di:waypoint x="2190" y="580" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_09aol3n_di" bpmnElement="Flow_09aol3n">
+        <di:waypoint x="898" y="210" />
+        <di:waypoint x="1010" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0cthr9h_di" bpmnElement="Flow_0cthr9h">
+        <di:waypoint x="1420" y="555" />
+        <di:waypoint x="1420" y="1270" />
+        <di:waypoint x="1520" y="1270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0d6d00e_di" bpmnElement="Flow_0d6d00e">
+        <di:waypoint x="2240" y="540" />
+        <di:waypoint x="2282" y="540" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ecuczw_di" bpmnElement="Flow_0ecuczw">
+        <di:waypoint x="1620" y="630" />
+        <di:waypoint x="1570" y="630" />
+        <di:waypoint x="1570" y="1230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0f15rob_di" bpmnElement="Flow_0f15rob">
+        <di:waypoint x="548" y="210" />
+        <di:waypoint x="600" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0h6cukx_di" bpmnElement="Flow_0h6cukx">
+        <di:waypoint x="1420" y="505" />
+        <di:waypoint x="1420" y="400" />
+        <di:waypoint x="1600" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0l9uexv_di" bpmnElement="Flow_0l9uexv">
+        <di:waypoint x="1270" y="530" />
+        <di:waypoint x="1395" y="530" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0mm6ve0_di" bpmnElement="Flow_0mm6ve0">
+        <di:waypoint x="930" y="820" />
+        <di:waypoint x="930" y="545" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0owbagu_di" bpmnElement="Flow_0owbagu">
+        <di:waypoint x="760" y="802" />
+        <di:waypoint x="760" y="560" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0psuoln_di" bpmnElement="Flow_0psuoln">
+        <di:waypoint x="1620" y="1270" />
+        <di:waypoint x="1825" y="1270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0qqhrt2_di" bpmnElement="Flow_0qqhrt2">
+        <di:waypoint x="2060" y="1680" />
+        <di:waypoint x="2060" y="1550" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0rkvfaa_di" bpmnElement="Flow_0rkvfaa">
+        <di:waypoint x="448" y="210" />
+        <di:waypoint x="512" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0y8zreg_di" bpmnElement="Flow_0y8zreg">
+        <di:waypoint x="374" y="540" />
+        <di:waypoint x="440" y="540" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10krwbr_di" bpmnElement="Flow_10krwbr">
+        <di:waypoint x="1220" y="490" />
+        <di:waypoint x="1220" y="210" />
+        <di:waypoint x="1342" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11yq6jm_di" bpmnElement="Flow_11yq6jm">
+        <di:waypoint x="1378" y="210" />
+        <di:waypoint x="1490" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_17xxb49_di" bpmnElement="Flow_17xxb49">
+        <di:waypoint x="1850" y="1295" />
+        <di:waypoint x="1850" y="1720" />
+        <di:waypoint x="2010" y="1720" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ahzqk2_di" bpmnElement="Flow_1ahzqk2">
+        <di:waypoint x="1650" y="440" />
+        <di:waypoint x="1650" y="472" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1d32nbs_di" bpmnElement="Flow_1d32nbs">
+        <di:waypoint x="1638" y="1230" />
+        <di:waypoint x="1780" y="1230" />
+        <di:waypoint x="1780" y="630" />
+        <di:waypoint x="1720" y="630" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1e92qh0_di" bpmnElement="Flow_1e92qh0">
+        <di:waypoint x="342" y="210" />
+        <di:waypoint x="412" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1hps6ku_di" bpmnElement="Flow_1hps6ku">
+        <di:waypoint x="750" y="480" />
+        <di:waypoint x="750" y="428" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1k4x31c_di" bpmnElement="Flow_1k4x31c">
+        <di:waypoint x="1110" y="980" />
+        <di:waypoint x="1110" y="1680" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1kbbg2v_di" bpmnElement="Flow_1kbbg2v">
+        <di:waypoint x="1160" y="882" />
+        <di:waypoint x="1160" y="670" />
+        <di:waypoint x="740" y="670" />
+        <di:waypoint x="740" y="560" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1kpq70v_di" bpmnElement="Flow_1kpq70v">
+        <di:waypoint x="1990" y="530" />
+        <di:waypoint x="2042" y="530" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1oe8l6b_di" bpmnElement="Flow_1oe8l6b">
+        <di:waypoint x="880" y="820" />
+        <di:waypoint x="880" y="228" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1pp9j66_di" bpmnElement="Flow_1pp9j66">
+        <di:waypoint x="1160" y="1720" />
+        <di:waypoint x="1220" y="1720" />
+        <di:waypoint x="1220" y="570" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1x13oc6_di" bpmnElement="Flow_1x13oc6">
+        <di:waypoint x="1700" y="400" />
+        <di:waypoint x="1850" y="400" />
+        <di:waypoint x="1850" y="1245" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1m0b44d_di" bpmnElement="Flow_1m0b44d">
+        <di:waypoint x="905" y="520" />
+        <di:waypoint x="800" y="520" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="803" y="473" width="59" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0rcrkol_di" bpmnElement="Flow_0rcrkol">
+        <di:waypoint x="324" y="228" />
+        <di:waypoint x="324" y="500" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="340" y="383" width="60" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1rgnrdp_di" bpmnElement="Flow_1rgnrdp">
+        <di:waypoint x="955" y="520" />
+        <di:waypoint x="1110" y="520" />
+        <di:waypoint x="1110" y="900" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1040" y="536" width="60" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

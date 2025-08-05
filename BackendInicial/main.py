@@ -1,7 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
-from pyzeebe import create_insecure_channel, ZeebeClient
+from pyzeebe import ZeebeClient, create_camunda_cloud_channel
 from dotenv import load_dotenv
 from models import SolicitudReembolso
 import os
@@ -10,6 +10,7 @@ import asyncio
 import logging
 from uuid import uuid4
 from datetime import datetime
+import signal
 
 # Configurar logging básico
 logging.basicConfig(level=logging.INFO)
@@ -18,28 +19,29 @@ logger = logging.getLogger(__name__)
 # Cargar variables de entorno desde .env
 load_dotenv()
 
-# Obtener host y validar que no esté vacío
-ZEEBE_HOST = os.getenv("ZEEBE_HOST", "localhost").strip()
-if not ZEEBE_HOST:
-    raise ValueError("La variable de entorno ZEEBE_HOST no puede estar vacía.")
+# Obtener credenciales de Camunda Cloud
+CAMUNDA_CLIENT_ID = os.getenv("CAMUNDA_CLIENT_ID")
+CAMUNDA_CLIENT_SECRET = os.getenv("CAMUNDA_CLIENT_SECRET")
+CAMUNDA_CLUSTER_ID = os.getenv("CAMUNDA_CLUSTER_ID")
+CAMUNDA_REGION = os.getenv("CAMUNDA_REGION", "lhr-1")
 
-# Obtener puerto y validar que sea entero válido
-port_str = os.getenv("ZEEBE_PORT", "26500").strip()
-try:
-    ZEEBE_PORT = int(port_str)
-    if not (1 <= ZEEBE_PORT <= 65535):
-        raise ValueError()
-except ValueError:
-    raise ValueError(f"ZEEBE_PORT debe ser un entero válido entre 1 y 65535, got '{port_str}'.")
+# Validar credenciales
+if not all([CAMUNDA_CLIENT_ID, CAMUNDA_CLIENT_SECRET, CAMUNDA_CLUSTER_ID]):
+    logger.error("Faltan credenciales de Camunda Cloud. Verifica las variables de entorno.")
+    raise ValueError("Faltan credenciales de Camunda Cloud. Verifica las variables de entorno.")
 
-# Construir target y crear canal
-target = f"{ZEEBE_HOST}:{ZEEBE_PORT}"
-logger.info(f"Conectando a Zeebe en {target}")
-channel = create_insecure_channel(target)
+# Crear canal de conexión a Camunda Cloud
+logger.info(f"Conectando a Camunda Cloud SaaS en la región {CAMUNDA_REGION}")
+channel = create_camunda_cloud_channel(
+    client_id=CAMUNDA_CLIENT_ID,
+    client_secret=CAMUNDA_CLIENT_SECRET,
+    cluster_id=CAMUNDA_CLUSTER_ID,
+    region=CAMUNDA_REGION
+)
 
 # Crear cliente Zeebe
 zeebe_client = ZeebeClient(channel)
-logger.info("Cliente Zeebe creado correctamente")
+logger.info("Cliente Zeebe para Camunda Cloud creado correctamente")
 
 # Inicializar aplicación FastAPI
 app = FastAPI()
@@ -112,7 +114,7 @@ async def enviar_reembolso(
         return JSONResponse(
             status_code=200,
             content={
-                "mensaje": "✅ Reembolso enviado correctamente a Zeebe local.",
+                "mensaje": "✅ Reembolso enviado correctamente a Camunda Cloud SaaS.",
                 "archivoGuardado": nombre_unico
             }
         )

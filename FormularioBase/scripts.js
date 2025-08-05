@@ -50,10 +50,30 @@ document.getElementById("reembolsoForm").addEventListener("submit", async functi
     formData.append("medioPago", campos.medioPago);
     formData.append("descripcion", campos.descripcion);
 
-    // Enviar al backend correcto
-    const response = await fetch("http://localhost:3000/api/reembolsos-aprobados", {
+    // Crear objeto JSON para enviar al backend de procesos BPM
+    const jsonData = JSON.stringify({
+      nombre: campos.nombre,
+      cedula: campos.cedula,
+      departamento: campos.departamento,
+      correo: campos.correo,
+      telefono: campos.telefono,
+      fechaGasto: campos.fechaGasto,
+      tipoGasto: campos.tipoGasto,
+      numeroFactura: campos.numeroFactura,
+      monto: campos.monto,
+      medioPago: campos.medioPago,
+      descripcion: campos.descripcion
+    });
+
+    // Crear FormData para enviar al backend BPM (FastAPI)
+    const bpmFormData = new FormData();
+    bpmFormData.append("solicitud", jsonData);
+    bpmFormData.append("archivo", archivo);
+
+    // Enviar al backend de procesos BPM (FastAPI)
+    const response = await fetch("http://localhost:8000/reembolso", {
       method: "POST",
-      body: formData
+      body: bpmFormData
     });
 
     if (response.ok) {
